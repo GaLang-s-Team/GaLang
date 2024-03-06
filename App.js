@@ -15,9 +15,9 @@ export default function App() {
         <Text>sendiri merupakan singkatan dari Garasi Petualang.</Text>
         <Text></Text>
         <Text>GaLang dikembangkan oleh:</Text>
-        <Text>Richard Haris 18221006 [Hustler]</Text>
-        <Text>Gyan Maiziko 18221008 [Hipster]</Text>
-        <Text>Wildhan Hidayatullah 18221024 [Hacker]</Text>
+        <Text>+ Richard Haris 18221006 [Hustler]</Text>
+        <Text>+ Gyan Maiziko 18221008 [Hipster]</Text>
+        <Text>+ Wildhan Hidayatullah 18221024 [Hacker]</Text>
       </View>
       <StatusBar style="auto" />
     </View>
