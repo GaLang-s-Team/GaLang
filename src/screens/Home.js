@@ -4,6 +4,7 @@ import Swiper from 'react-native-swiper';
 import Topback from "../component/Topback";
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView } from "react-native-gesture-handler";
+import Navbar from "../component/Navbar";
 
 const Home = () => {
     const [activeIndex, setActiveIndex] = useState(0);
@@ -71,6 +72,7 @@ const Home = () => {
                 />
             </View>
             </ScrollView>
+            <Navbar/>
         </View>
     );
 };
