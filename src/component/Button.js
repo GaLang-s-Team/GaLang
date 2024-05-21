@@ -8,7 +8,7 @@ const Button = ({ children, onPress, backgroundColor }) => {
         backgroundColor: backgroundColor || "#459708",
         paddingHorizontal: 14,
         paddingVertical: 14,
-        marginTop: 16,
+        marginTop: 14,
         marginHorizontal: 'auto',
         marginBottom: 6,
         elevation: 2,

@@ -11,6 +11,7 @@ import { firebaseAuth, firestore } from '../config/firebase';
 import { Ionicons } from '@expo/vector-icons';
 import { getKey, storeKey } from '../config/localStorage';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import Checkbox from 'expo-checkbox';
 
 const Signin = () => {
     let [fontsLoaded] = useFonts({
@@ -36,7 +37,7 @@ const Signin = () => {
     }, []);
 
     const handleSignUp = () => {
-        navigation.replace('Signup');
+        navigation.navigate('Signup');
     };
 
     const handleLogin = async () => {
@@ -105,10 +106,12 @@ const Signin = () => {
         setHidePassword(!hidePassword);
     };
 
+    const [isChecked, setChecked] = useState(false);
+
     return (
         <View style={style.container}>
             <View>
-                <Image source={require('../../assets/abstrack.svg')} contentFit='fill' style={{ width: 400, height: 210, shadowColor: '#003049' }} />
+                <Image source={require('../../assets/abstrack.svg')} contentFit='fill' style={{ width: 'auto', height: 210, shadowColor: '#003049' }} />
             </View>
             <View style={style.banner}>
                 <Image source={require('../../assets/GaLang.png')} contentFit='fill' style={{ width: 105, height: 149 }} />
@@ -118,31 +121,41 @@ const Signin = () => {
                 <Text style={{ marginHorizontal: 'auto', fontWeight: '700', color: '#459708', fontSize: 20 }}>Let’s Sign In To Explore More</Text>
             </View>
             <View style={style.form}>
-                <TextInput
-                    style={{ width: 297, height: 51, borderWidth: 1, borderRadius: 8, marginHorizontal: 'auto', marginTop: 20, paddingHorizontal: 20, borderColor: '#C2C2C2' }}
-                    placeholder='Enter Email'
-                    label={"Email"}
-                    invalid={!inputs.email.isValid}
-                    onChangeText={inputChangeHandler.bind(this, 'email')}
-                />
-                <View style={{ width: 297, height: 51, borderWidth: 1, borderRadius: 8, marginHorizontal: 'auto', marginTop: 20, paddingHorizontal: 20, borderColor: '#C2C2C2', flexDirection: 'row', alignItems: 'center' }}>
-                    <TextInput
-                        style={{ flex: 1 }}
-                        placeholder='Enter Password'
-                        label={"Password"}
-                        secureTextEntry={hidePassword}
-                        invalid={!inputs.password.isValid}
-                        onChangeText={inputChangeHandler.bind(this, 'password')}
-                    />
-                    <TouchableOpacity onPress={togglePasswordVisibility}>
-                        <Ionicons name={hidePassword ? 'eye-outline' : 'eye-off-outline'} size={24} color="gray" />
-                    </TouchableOpacity>
-                </View>
-                <View style={{ marginVertical: 1 }}>
-                    <Text style={{ paddingLeft: 50, fontSize: 12, fontWeight: 'bold', color: '#459708' }}>remember me</Text>
+                <View style={{ width: 297, height: 51, borderWidth: 1, borderRadius: 8, marginHorizontal: 'auto', marginTop: 20, paddingHorizontal: 15, borderColor: '#C2C2C2', flexDirection: 'row', alignItems: 'center' }}>
+                        <Ionicons name="mail-outline" size={24} color="gray" style={{ marginRight: 10, }} />
+                        <TextInput
+                            style={{ flex: 1, paddingLeft:15 }}
+                            placeholder='Enter Email'
+                            label={"Email"}
+                            invalid={!inputs.email.isValid}
+                            onChangeText={inputChangeHandler.bind(this, 'email')}
+                        />
+                    </View>
+                    <View style={{ width: 297, height: 51, borderWidth: 1, borderRadius: 8, marginHorizontal: 'auto', marginTop: 20, paddingHorizontal: 15, borderColor: '#C2C2C2', flexDirection: 'row', alignItems: 'center' }}>
+                        <TouchableOpacity onPress={togglePasswordVisibility}>
+                            <Ionicons name={hidePassword ? 'eye-off-outline' : 'eye-outline' } size={24} color="gray" />
+                        </TouchableOpacity>
+                        <TextInput
+                            style={{ flex: 1, paddingLeft:15 }}
+                            placeholder='Enter Password'
+                            label={"Password"}
+                            secureTextEntry={hidePassword}
+                            invalid={!inputs.password.isValid}
+                            onChangeText={inputChangeHandler.bind(this, 'password')}
+                        />
+                    </View>
+                <View style={{ marginVertical: 1,flexDirection: 'row', alignItems: 'center', marginTop: 15, marginHorizontal: 20, }}>
+                    {/* Check box */}
+                    <Checkbox value={isChecked} onValueChange={setChecked} style={{ marginRight:10 }} color={isChecked ? '#459708' : undefined}/>
+                    <Text style = {{ paddingLeft: 15, fontSize:12, fontWeight:'bold', color: '#459708' }}>remember me</Text>
                 </View>
                 <Button children={'Sign In'} onPress={handleLogin} />
-                <Text style={style.text}>Already have an account? <Text style={{ fontWeight: 'bold' }}>Sign In</Text></Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 14, color: '#004268' }}>Don't Have An Account?</Text>
+                        <TouchableOpacity onPress={handleSignUp}>
+                            <Text style={{ fontSize: 14, fontWeight: '600', color: '#004268', marginLeft: 5 }}>Create Account</Text>
+                        </TouchableOpacity>
+                </View>
             </View>
         </View>
     );
