@@ -7,6 +7,7 @@ import Splash from '../screens/Splash';
 import Signup from '../screens/Signup';
 // import Signin from '../screens/Signin';
 import ProductDetail from '../screens/ProductDetail';
+import ProductInsert from '../screens/ProductInsert';
 
 const Stack = createStackNavigator()
 
@@ -20,7 +21,8 @@ const Routes = () => {
             {/* <Stack.Screen name= 'Signin' component ={Signin} options={{ headerShown:false }}/> */}
             {/* <Stack.Screen name='Signup' component={Signup} options={{ headerShown:false }}/> */}
             {/* <Stack.Screen name= 'Home' component ={Home} options={{ headerShown:false }}/> */}
-            <Stack.Screen name='ProductDetail' component={ProductDetail} options={{ headerShown:false }}/>
+            {/* <Stack.Screen name='ProductDetail' component={ProductDetail} options={{ headerShown:false }}/> */}
+            <Stack.Screen name='ProductInsert' component={ProductInsert} options={{ headerShown:false }}/>
         </Stack.Navigator>
       </NavigationContainer>
     </View>
