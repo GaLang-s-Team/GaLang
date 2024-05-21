@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, FlatList, Modal, TouchableWithoutFeedback, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Swiper from 'react-native-swiper';
+import { LinearGradient } from 'expo-linear-gradient';
 
 
 export default function ProductDetail({ navigation }) {
@@ -33,10 +34,10 @@ export default function ProductDetail({ navigation }) {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Ionicons name='arrow-back' size={24} color='white' />
+            <Ionicons name='arrow-back' size={24} color='#FFFFFF' />
           </TouchableOpacity>
           <TouchableOpacity style={styles.shareButton} onPress={() => Alert.alert('Share', 'Share this product!')}>
-            <Ionicons name='share-social' size={24} color='white' />
+            <Ionicons name='share-social' size={24} color='#FFFFFF' />
           </TouchableOpacity>
         </View>
         <View style={styles.imageSlider}>
@@ -145,26 +146,28 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingBottom: 100,
   },
-  header: {
-    backgroundColor: '#459708',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    paddingVertical: 7.5,
-  },
   backButton: {
-    backgroundColor: 'rgba(22, 25, 32, 0.6)',
+    position: 'absolute',
+    zIndex: 1,
+    top: 10,
+    left: 10,
+    backgroundColor: 'rgba(22, 25, 32, 0.5)',
     borderRadius: 50,
     padding: 7.5,
   },
   shareButton: {
-    backgroundColor: 'rgba(22, 25, 32, 0.6)',
+    position: 'absolute',
+    zIndex: 1,
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(22, 25, 32, 0.5)',
     borderRadius: 50,
     padding: 7.5,
   },
   imageSlider: {
     height: 300,
-  },arrowLeft: {
+  },
+  arrowLeft: {
     position: 'absolute',
     top: '50%',
     left: 10,
