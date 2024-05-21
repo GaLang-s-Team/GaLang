@@ -3,18 +3,18 @@ import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity,
 import { Ionicons } from '@expo/vector-icons';
 import Swiper from 'react-native-swiper';
 
-const similarProducts = [
-  // Data produk serupa
-  { id: '1', name: 'Product 1', image: 'https://via.placeholder.com/100', price: '10000' },
-  { id: '2', name: 'Product 2', image: 'https://via.placeholder.com/100', price: '15000' },
-];
 
 export default function ProductDetail({ navigation }) {
   const [isBuyModalVisible, setBuyModalVisible] = useState(false);
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
-
+  
   const sizes = ['S', 'M', 'L', 'XL'];
+  const similarProducts = [
+    // Data produk serupa
+    { id: '1', name: 'Product 1', image: 'https://via.placeholder.com/100', price: '10000' },
+    { id: '2', name: 'Product 2', image: 'https://via.placeholder.com/100', price: '15000' },
+  ];
 
   const toggleBuyModal = () => {
     setBuyModalVisible(!isBuyModalVisible);
@@ -23,7 +23,7 @@ export default function ProductDetail({ navigation }) {
   const handleAddToCart = () => {
     Alert.alert('Success', 'Product added to cart!');
   };
-  
+
   const handleQuantityChange = (change) => {
     setQuantity((prevQuantity) => Math.max(1, prevQuantity + change));
   };
@@ -117,16 +117,16 @@ export default function ProductDetail({ navigation }) {
           <Text style={styles.modalTitle}>Masukkan Jumlah</Text>
           <View style={styles.quantityContainer}>
             <TouchableOpacity style={styles.quantityButton} onPress={() => handleQuantityChange(-1)}>
-              <Ionicons name="remove" size={24} color="black" />
+              <Ionicons name='remove' size={24} color='#004268' />
             </TouchableOpacity>
             <TextInput
               style={styles.quantityInput}
               value={String(quantity)}
-              keyboardType="numeric"
+              keyboardType='numeric'
               onChangeText={(text) => setQuantity(Number(text))}
             />
             <TouchableOpacity style={styles.quantityButton} onPress={() => handleQuantityChange(1)}>
-              <Ionicons name="add" size={24} color="black" />
+              <Ionicons name='add' size={24} color='#004268' />
             </TouchableOpacity>
           </View>
           <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10}} onPress={() => Alert.alert('Purchase', 'Proceed to payment!')}>
@@ -316,5 +316,47 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  sizeOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  sizeOption: {
+    width:50,
+    height: 30,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: '#004268',
+    borderRadius: 5,
+  },
+  selectedSizeOption: {
+    backgroundColor: 'lightgray',
+  },
+  sizeOptionText: {
+    color: '#004268',
+    fontSize: 16,
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  quantityButton: {
+    padding: 1.5,
+    borderWidth: 1,
+    borderColor: '#004268',
+    borderRadius: 5,
+  },
+  quantityInput: {
+    width: 50,
+    height: 31,
+    textAlign: 'center',
+    color: '#004268',
+    borderWidth: 1,
+    borderColor: '#004268',
+    borderRadius: 5,
+    marginHorizontal: 10,
   },
 });
