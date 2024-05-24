@@ -1,13 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Image, Dimensions, Text, TouchableOpacity, FlatList } from 'react-native';
 import Swiper from 'react-native-swiper';
 import Topback from "../component/Topback";
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView } from "react-native-gesture-handler";
 import Navbar from "../component/Navbar";
+import { doc, getDoc } from 'firebase/firestore';
+import { destroyKey, getKey } from '../config/localStorage'
+import { firebaseAuth, firestore } from '../config/firebase'
+import { signOut } from 'firebase/auth'
+import { useNavigation } from '@react-navigation/native';
 
-const Home = () => {
+const Home = (navigation, route) => {
+    // const { userId } = route.params;
+    const [dataUsers, setDataUsers] = useState([])
+    // const isFocused = useIsFocused();
+    const [isLoading, setIsLoading] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
+    // const navigation = useNavigation();
     const images = [
         require('../../assets/Sepatu.jpg'),
         require('../../assets/Sepatu.jpg'),
@@ -15,6 +25,24 @@ const Home = () => {
         require('../../assets/Sepatu.jpg'),
         require('../../assets/Sepatu.jpg'),
     ];
+
+    // useEffect(() => {
+    //     setIsLoading(true)
+    //     const docRef = doc(firestore, "users", userId)
+    //     getDoc(docRef).then((doc) => {
+    //     setDataUsers(doc.data())
+    //     }).finally(() => {
+    //     setIsLoading(false)
+    //     })
+    // }, [userId]);
+
+    // console.log(userId);
+    // useLayoutEffect(() => {
+    //     navigation.setOptions({
+    //         headerLeft: null
+    //     })
+    // }, [isFocused, userId]);
+    
 
     const renderItem = ({ item }) => (
         <TouchableOpacity style={styles.card}>
@@ -31,10 +59,22 @@ const Home = () => {
         </TouchableOpacity>
     );
 
+    const handleLogout = () => {
+        signOut(firebaseAuth).then(() => {
+            destroyKey()
+            navigation.replace('Signin')
+        })
+    }
+
     return (
         <View style={{ flex: 1 }}>
-            <ScrollView>
-            <Topback />
+            {/* <ScrollView> */}
+            <Topback/>
+            {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom:'20%'}}>
+                    <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', height: 52, width: 100, paddingHorizontal: 8, paddingVertical: 4, marginTop: 15, backgroundColor: '#DD310C', borderRadius: 10, }} onPress={handleLogout}>
+                            <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#ffffff' }}>Log Out</Text>
+                    </TouchableOpacity>
+                </View> */}
             <View style={styles.swiperContainer}>
                 <Swiper 
                     loop 
@@ -71,7 +111,7 @@ const Home = () => {
                     contentContainerStyle={styles.flatListContent}
                 />
             </View>
-            </ScrollView>
+            {/* </ScrollView> */}
             <Navbar/>
         </View>
     );

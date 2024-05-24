@@ -31,7 +31,7 @@ const Signin = () => {
             const data = res;
             console.log("data : ", data);
             if (data) {
-                navigation.replace('Signup', { userId: data });
+                navigation.replace('Home', { userId: data });
             }
         });
     }, []);
@@ -54,11 +54,11 @@ const Signin = () => {
                 email: { value: currentInputs.email.value, isValid: emailIsValid },
                 password: { value: currentInputs.password.value, isValid: passwordIsValid },
             }));
-            Toast.show('Please, check your input', {
-                duration: 2000,
-                placement: 'bottom',
-                type: 'danger',
-            });
+            // Toast.show('Please, check your input', {
+            //     duration: 2000,
+            //     placement: 'bottom',
+            //     type: 'danger',
+            // });
             return;
         }
 
@@ -68,25 +68,26 @@ const Signin = () => {
             const userCredential = await signInWithEmailAndPassword(firebaseAuth, dataLogin.email, dataLogin.password);
             const userId = userCredential.user.uid;
             const emailVerified = userCredential.user.emailVerified;
+            console.log(userId)
 
             if (!emailVerified) {
-                Toast.show('Email belum terverifikasi', {
-                    duration: 3000,
-                    placement: 'bottom',
-                    type: 'danger',
-                });
+                // Toast.show('Email belum terverifikasi', {
+                //     duration: 3000,
+                //     placement: 'bottom',
+                //     type: 'danger',
+                // });
                 return;
             } else {
                 storeKey('LOGGED_IN', userId);
-                navigation.replace('Signup', { userId: userId });
+                navigation.replace('Home', { userId: userId });
             }
         } catch (error) {
             const errorMessage = error.message;
-            Toast.show(errorMessage, {
-                duration: 3000,
-                placement: 'bottom',
-                type: 'danger',
-            });
+            // Toast.show(errorMessage, {
+            //     duration: 3000,
+            //     placement: 'bottom',
+            //     type: 'danger',
+            // });
         } finally {
             setIsLoading(false);
         }

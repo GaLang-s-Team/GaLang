@@ -5,13 +5,13 @@ import { initializeAuth, getReactNativePersistence } from "firebase/auth"
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyB5vkhjRPM_s7IZ1n-3AtPbk3pk2wL41Jk",
-    authDomain: "galang-ab3b5.firebaseapp.com",
-    projectId: "galang-ab3b5",
-    storageBucket: "galang-ab3b5.appspot.com",
-    messagingSenderId: "707778552323",
-    appId: "1:707778552323:web:99d5864e8634d739e96436",
-    measurementId: "G-RJLFFB2CMY"
+    apiKey: "AIzaSyA0OxWGX81Yj4gzPgoObCWn8LPXZCVSusQ",
+    authDomain: "galang-907b4.firebaseapp.com",
+    projectId: "galang-907b4",
+    storageBucket: "galang-907b4.appspot.com",
+    messagingSenderId: "288447102241",
+    appId: "1:288447102241:web:e6d4326292dc3399e01260",
+    measurementId: "G-0RTGVPRJY4"
 };
 
 // fungsi initializeApp dengan objek firebaseConfig bertindak sebagai argumen untuk menginisialisasi Firebase dalam 

@@ -27,6 +27,7 @@ const Signup = () => {
         email: {value: '', isValid: true},
         password: { value: '', isValid: true },
     })
+    
 
     const handleRegister = async () => {
 
@@ -48,24 +49,28 @@ const Signup = () => {
             password: { value: currentInputs.password.value, isValid: passwordIsValid },
         }));
 
-        console.log(inputs);
-        console.log(fullnameIsValid);
-        console.log(emailIsValid);
-        console.log(passwordIsValid);
+        // console.log(inputs);
+        // console.log(fullnameIsValid);
+        // console.log(emailIsValid);
+        // console.log(passwordIsValid);
 
-        Toast.show("Check your input", {
-            duration: 3000,
-            placement: 'bottom',
-            type: 'danger',
-        });
+        // Toast.show("Check your input", {
+        //     duration: 3000,
+        //     placement: 'bottom',
+        //     type: 'danger',
+        // });
         return;
     }
+
+    // console.log(dataRegister);
 
     // Jika semua input valid ubah state isLoading menjadi true
     setIsLoading(true);
     try {
         const success = await createUserWithEmailAndPassword(firebaseAuth, dataRegister.email, dataRegister.password);
         const userId = success.user.uid;
+        console.log(userId);
+        
 
         await sendEmailVerification(firebaseAuth.currentUser)
         Toast.show("Email verifikasi terkirim", {
@@ -80,26 +85,33 @@ const Signup = () => {
             fullname: dataRegister.fullname,
         };
 
-        await setDoc(doc(firestore, "users", userId), docRef);
+        console.log("docRef Created : ",docRef);
 
+        await setDoc(doc(firestore, "users", userId), docRef);
+        console.log("Document set in Firestore");
 
         console.log("Register Success");
 
-        Toast.show("Register success please login", {
-            duration: 3000,
-            placement: 'bottom',
-            type: 'success',
-        });
-        navigation.replace('Home')
+        // Toast.show("Register success please login", {
+        //     duration: 3000,
+        //     placement: 'bottom',
+        //     type: 'success',
+        // });
+        navigation.replace('Signin')
         } catch (error) {
         const errorMessage = error.message;
-        Toast.show(errorMessage, {
-        duration: 3000,
-        placement: 'bottom',
-        type: 'danger',
-        });
-    }
+        // Toast.show(errorMessage, {
+        // duration: 3000,
+        // placement: 'bottom',
+        // type: 'danger',
+        // });
+        } finally {
+            setIsLoading(false);
+        }
+
     };
+
+    
 
     const inputChangeHandler = (inputIdentifier, enteredValue) => {
         setInputs((currentInputs) => {
