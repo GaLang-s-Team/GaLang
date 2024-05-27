@@ -10,6 +10,7 @@ import ProductDetail from '../screens/ProductDetail';
 import ProductInsert from '../screens/ProductInsert';
 import Home from '../screens/Home';
 import StatusPenyewaan from '../screens/StatusPenyewaan';
+import Profil from '../screens/Profil';
 
 const Stack = createStackNavigator()
 
@@ -26,6 +27,8 @@ const Routes = () => {
             {/* <Stack.Screen name='ProductDetail' component={ProductDetail} options={{ headerShown:false }}/> */}
             {/* <Stack.Screen name='ProductInsert' component={ProductInsert} options={{ headerShown:false }}/> */}
             <Stack.Screen name= 'StatusPenyewaan' component ={StatusPenyewaan} options={{ headerShown:false }}/>
+            <Stack.Screen name= 'Profil' component ={Profil} options={{ headerShown:false }}/>
+
         </Stack.Navigator>
       </NavigationContainer>
     </View>

@@ -1,12 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { doc, getDoc } from 'firebase/firestore';
+import { firebaseAuth, firestore } from '../config/firebase'
 
-const Navbar = ({  }) => {
+const Navbar = ({ route }) => {
+    const { userId } = route.params;
+    const [dataUsers, setDataUsers] = useState([])
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        setIsLoading(true)
+        const docRef = doc(firestore, "users", userId)
+        getDoc(docRef).then((doc) => {
+        setDataUsers(doc.data())
+        }).finally(() => {
+        setIsLoading(false)
+        })
+    }, [userId]);
+
     const navigation = useNavigation();
     const handleToHome = () => {
-        navigation.navigate('Home');
+        navigation.navigate('Home', {userId: userId});
     }
     const handleToTrans = () => {
         navigation.navigate('Signin');
@@ -15,7 +31,7 @@ const Navbar = ({  }) => {
         navigation.navigate('Home');
     }
     const handleToProfile = () => {
-        navigation.navigate('Home');
+        navigation.navigate('Profil', {userId: userId});
     }
 
     return (
@@ -50,6 +66,7 @@ const styles = StyleSheet.create({
         borderTopColor: '#ddd',
         borderTopLeftRadius: 12,
         borderTopRightRadius: 12,
+        position: 'static',
     },
     menuItem: {
         alignItems: 'center',

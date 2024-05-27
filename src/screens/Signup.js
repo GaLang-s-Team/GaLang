@@ -13,6 +13,7 @@ import { firebaseAuth, firestore } from '../config/firebase'
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
 import Checkbox from 'expo-checkbox';
+import { Snackbar } from 'react-native-paper'; // Import Snackbar
 
 const Signup = () => {
     let [fontsLoaded] = useFonts({
@@ -28,6 +29,10 @@ const Signup = () => {
         password: { value: '', isValid: true },
     })
     
+    const [snackbarVisible, setSnackbarVisible] = useState(false); // State untuk menampilkan Snackbar
+    const [snackbarMessage, setSnackbarMessage] = useState(''); // Pesan yang akan ditampilkan di Snackbar
+    const [snackVisible, setSnackVisible] = useState(false); // State untuk menampilkan Snackbar
+    const [snackMessage, setSnackMessage] = useState(''); // Pesan yang akan ditampilkan di Snackbar
 
     const handleRegister = async () => {
 
@@ -59,6 +64,8 @@ const Signup = () => {
         //     placement: 'bottom',
         //     type: 'danger',
         // });
+        setSnackbarMessage('Please, check your input'); // Set pesan untuk Snackbar
+        setSnackbarVisible(true); // Tampilkan Snackbar
         return;
     }
 
@@ -73,11 +80,15 @@ const Signup = () => {
         
 
         await sendEmailVerification(firebaseAuth.currentUser)
-        Toast.show("Email verifikasi terkirim", {
-            duration: 3000,
-            placement: 'bottom',
-            type: 'success',
-        });
+        // Toast.show("Email verifikasi terkirim", {
+        //     duration: 3000,
+        //     placement: 'bottom',
+        //     type: 'success',
+        // });
+        setSnackMessage("Email Verifikasi Terkirim");
+        setSnackVisible(true)
+
+
 
         const docRef = {
             userId: userId,
@@ -97,9 +108,13 @@ const Signup = () => {
         //     placement: 'bottom',
         //     type: 'success',
         // });
+        setSnackMessage("Register success please login");
+        setSnackVisible(true)
         navigation.replace('Signin')
         } catch (error) {
         const errorMessage = error.message;
+        setSnackbarMessage(errorMessage); // Set pesan untuk Snackbar
+        setSnackbarVisible(true); // Tampilkan Snackbar
         // Toast.show(errorMessage, {
         // duration: 3000,
         // placement: 'bottom',
@@ -191,6 +206,29 @@ const Signup = () => {
                         </TouchableOpacity>
                 </View>
             </View>
+            {/* Snackbar untuk menampilkan pesan error */}
+            <Snackbar
+                visible={snackbarVisible}
+                onDismiss={() => setSnackbarVisible(false)}
+                duration={2000}
+                style={{ marginBottom: "2%", backgroundColor: '#ff0e0e', justifyContent: 'center', borderRadius: 29, marginBottom: '3%'}}
+            >
+                <Text style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>
+                    {snackbarMessage}
+                </Text>
+            </Snackbar>
+
+            {/* Snackbar untuk menampilkan pesan berhasil */}
+            <Snackbar
+                visible={snackVisible}
+                onDismiss={() => setSnackVisible(false)}
+                duration={2000}
+                style={{ marginBottom: "2%", backgroundColor: 'green', justifyContent: 'center', borderRadius: 29, marginBottom: '3%'}}
+            >
+                <Text style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>
+                    {snackMessage}
+                </Text>
+            </Snackbar>
         </View>
     );
 };

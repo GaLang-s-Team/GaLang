@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getKey, storeKey } from '../config/localStorage';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import Checkbox from 'expo-checkbox';
+import { Snackbar } from 'react-native-paper'; // Import Snackbar
 
 const Signin = () => {
     let [fontsLoaded] = useFonts({
@@ -26,15 +27,20 @@ const Signin = () => {
         password: { value: '', isValid: true },
     });
 
+    const [snackbarVisible, setSnackbarVisible] = useState(false); // State untuk menampilkan Snackbar
+    const [snackbarMessage, setSnackbarMessage] = useState(''); // Pesan yang akan ditampilkan di Snackbar
+
     useEffect(() => {
         getKey('LOGGED_IN').then(res => {
             const data = res;
-            console.log("data : ", data);
+            console.log("data user: ", data);
             if (data) {
                 navigation.replace('Home', { userId: data });
             }
         });
     }, []);
+
+    // console.log(dataUsers);
 
     const handleSignUp = () => {
         navigation.navigate('Signup');
@@ -54,11 +60,8 @@ const Signin = () => {
                 email: { value: currentInputs.email.value, isValid: emailIsValid },
                 password: { value: currentInputs.password.value, isValid: passwordIsValid },
             }));
-            // Toast.show('Please, check your input', {
-            //     duration: 2000,
-            //     placement: 'bottom',
-            //     type: 'danger',
-            // });
+            setSnackbarMessage('Please, check your input'); // Set pesan untuk Snackbar
+            setSnackbarVisible(true); // Tampilkan Snackbar
             return;
         }
 
@@ -71,11 +74,8 @@ const Signin = () => {
             console.log(userId)
 
             if (!emailVerified) {
-                // Toast.show('Email belum terverifikasi', {
-                //     duration: 3000,
-                //     placement: 'bottom',
-                //     type: 'danger',
-                // });
+                setSnackbarMessage('Email belum terverifikasi'); // Set pesan untuk Snackbar
+                setSnackbarVisible(true); // Tampilkan Snackbar
                 return;
             } else {
                 storeKey('LOGGED_IN', userId);
@@ -83,11 +83,8 @@ const Signin = () => {
             }
         } catch (error) {
             const errorMessage = error.message;
-            // Toast.show(errorMessage, {
-            //     duration: 3000,
-            //     placement: 'bottom',
-            //     type: 'danger',
-            // });
+            setSnackbarMessage(errorMessage); // Set pesan untuk Snackbar
+            setSnackbarVisible(true); // Tampilkan Snackbar
         } finally {
             setIsLoading(false);
         }
@@ -158,6 +155,17 @@ const Signin = () => {
                         </TouchableOpacity>
                 </View>
             </View>
+            {/* Snackbar untuk menampilkan pesan error */}
+            <Snackbar
+                visible={snackbarVisible}
+                onDismiss={() => setSnackbarVisible(false)}
+                duration={2000}
+                style={{ marginBottom: "2%", backgroundColor: '#ff0e0e', justifyContent: 'center', borderRadius: 29, marginBottom: '3%'}}
+            >
+                <Text style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>
+                    {snackbarMessage}
+                </Text>
+            </Snackbar>
         </View>
     );
 };

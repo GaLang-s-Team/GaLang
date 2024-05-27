@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { View, StyleSheet, Image, Dimensions, Text, TouchableOpacity, FlatList } from 'react-native';
 import Swiper from 'react-native-swiper';
 import Topback from "../component/Topback";
@@ -10,11 +10,12 @@ import { destroyKey, getKey } from '../config/localStorage'
 import { firebaseAuth, firestore } from '../config/firebase'
 import { signOut } from 'firebase/auth'
 import { useNavigation } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 
-const Home = (navigation, route) => {
-    // const { userId } = route.params;
+const Home = ({navigation, route}) => {
+    const { userId } = route.params;
     const [dataUsers, setDataUsers] = useState([])
-    // const isFocused = useIsFocused();
+    const isFocused = useIsFocused();
     const [isLoading, setIsLoading] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     // const navigation = useNavigation();
@@ -26,22 +27,24 @@ const Home = (navigation, route) => {
         require('../../assets/Sepatu.jpg'),
     ];
 
-    // useEffect(() => {
-    //     setIsLoading(true)
-    //     const docRef = doc(firestore, "users", userId)
-    //     getDoc(docRef).then((doc) => {
-    //     setDataUsers(doc.data())
-    //     }).finally(() => {
-    //     setIsLoading(false)
-    //     })
-    // }, [userId]);
+    useEffect(() => {
+        setIsLoading(true)
+        const docRef = doc(firestore, "users", userId)
+        getDoc(docRef).then((doc) => {
+        setDataUsers(doc.data())
+        }).finally(() => {
+        setIsLoading(false)
+        })
+    }, [userId]);
 
-    // console.log(userId);
-    // useLayoutEffect(() => {
-    //     navigation.setOptions({
-    //         headerLeft: null
-    //     })
-    // }, [isFocused, userId]);
+    console.log(dataUsers);
+
+    console.log(userId);
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerLeft: null
+        })
+    }, [isFocused, userId]);
     
 
     const renderItem = ({ item }) => (
@@ -61,20 +64,20 @@ const Home = (navigation, route) => {
 
     const handleLogout = () => {
         signOut(firebaseAuth).then(() => {
-            destroyKey()
-            navigation.replace('Signin')
+            destroyKey();
+            navigation.replace('Signin');
         })
     }
 
     return (
         <View style={{ flex: 1 }}>
             {/* <ScrollView> */}
-            <Topback/>
+            <Topback nama={dataUsers.fullname} userId={userId}/>
             {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom:'20%'}}>
-                    <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', height: 52, width: 100, paddingHorizontal: 8, paddingVertical: 4, marginTop: 15, backgroundColor: '#DD310C', borderRadius: 10, }} onPress={handleLogout}>
-                            <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#ffffff' }}>Log Out</Text>
-                    </TouchableOpacity>
-                </View> */}
+                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', height: 52, width: 100, paddingHorizontal: 8, paddingVertical: 4, marginTop: 15, backgroundColor: '#DD310C', borderRadius: 10, }} onPress={handleLogout}>
+                        <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#ffffff' }}>Log Out</Text>
+                </TouchableOpacity>
+            </View> */}
             <View style={styles.swiperContainer}>
                 <Swiper 
                     loop 
@@ -112,7 +115,7 @@ const Home = (navigation, route) => {
                 />
             </View>
             {/* </ScrollView> */}
-            <Navbar/>
+            <Navbar route={route}/>
         </View>
     );
 };

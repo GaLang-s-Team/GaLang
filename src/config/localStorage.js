@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Toast } from "react-native-toast-notifications";
 
 // store key fungsi yang digunakan untuk menyimpan data dengan kunci (key) tertentu ke penyimpanan lokal (local storage).
 // Fungsi ini menerima dua parameter: key dan value.
@@ -10,11 +9,7 @@ export const storeKey = async (key, value) => {
     try {
         await AsyncStorage.setItem(key, JSON.stringify(value))
     } catch (error) {
-        Toast.show("Error store key", {
-            data: error,
-            duration: 2000,
-            type: "danger"
-        })
+        console.log(error);
     }
 }
 
@@ -30,11 +25,7 @@ export const getKey = async (key) => {
             return JSON.parse(value)
         }
     } catch (error) {
-        Toast.show("Error get key", {
-            data: error,
-            duration: 2000,
-            type: "danger"
-        })
+        console.log(error);
     }
 }
 
