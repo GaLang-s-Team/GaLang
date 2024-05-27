@@ -123,7 +123,7 @@ const Signin = () => {
             </View>
             <View style={style.form}>
                 <View style={{ width: 297, height: 51, borderWidth: 1, borderRadius: 8, marginHorizontal: 'auto', marginTop: 20, paddingHorizontal: 15, borderColor: '#C2C2C2', flexDirection: 'row', alignItems: 'center' }}>
-                        <Ionicons name="mail-outline" size={24} color="gray" style={{ marginRight: 10, }} />
+                        <Ionicons name="mail-outline" size={24} color="gray" />
                         <TextInput
                             style={{ flex: 1, paddingLeft:15 }}
                             placeholder='Enter Email'
