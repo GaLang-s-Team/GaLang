@@ -3,22 +3,21 @@ import { View, StyleSheet, Image, Dimensions, Text, TouchableOpacity, FlatList }
 import Swiper from 'react-native-swiper';
 import Topback from "../component/Topback";
 import { Ionicons } from '@expo/vector-icons';
-import { ScrollView } from "react-native-gesture-handler";
-import Navbar from "../component/Navbar";
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { destroyKey, getKey } from '../config/localStorage'
 import { firebaseAuth, firestore } from '../config/firebase'
 import { signOut } from 'firebase/auth'
 import { useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
+import Navbar from "../component/Navbar";
 
-const Home = ({navigation, route}) => {
+const Home = ({ navigation, route }) => {
     const { userId } = route.params;
-    const [dataUsers, setDataUsers] = useState([])
+    const [dataUsers, setDataUsers] = useState({});
+    const [peralatan, setPeralatan] = useState([]);
     const isFocused = useIsFocused();
     const [isLoading, setIsLoading] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
-    // const navigation = useNavigation();
     const images = [
         require('../../assets/Sepatu.jpg'),
         require('../../assets/Sepatu.jpg'),
@@ -28,32 +27,37 @@ const Home = ({navigation, route}) => {
     ];
 
     useEffect(() => {
-        setIsLoading(true)
-        const docRef = doc(firestore, "users", userId)
+        setIsLoading(true);
+        const docRef = doc(firestore, "users", userId);
         getDoc(docRef).then((doc) => {
-        setDataUsers(doc.data())
-        }).finally(() => {
-        setIsLoading(false)
-        })
+            setDataUsers(doc.data());
+        });
+
+        const fetchPeralatan = async () => {
+            const peralatanCollection = collection(firestore, "peralatan");
+            const peralatanSnapshot = await getDocs(peralatanCollection);
+            const peralatanList = peralatanSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setPeralatan(peralatanList);
+        };
+
+        fetchPeralatan().finally(() => {
+            setIsLoading(false);
+        });
     }, [userId]);
 
-    console.log(dataUsers);
-
-    console.log(userId);
     useLayoutEffect(() => {
         navigation.setOptions({
             headerLeft: null
-        })
+        });
     }, [isFocused, userId]);
-    
 
     const renderItem = ({ item }) => (
         <TouchableOpacity style={styles.card}>
-            <Image source={item} style={styles.image} />
+            <Image source={images[0]} style={styles.image} />
             <View style={styles.cardContent}>
-                <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">Perlengkapan Outdoor</Text>
-                <Text style={styles.title}>Rp150.000</Text>
-                <Text style={styles.rating}>★★★★★</Text>
+                <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">{item.nama}</Text>
+                <Text style={styles.title}>Rp{item.harga}</Text>
+                <Text style={styles.rating}>{'★'.repeat(item.rating)}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name="location-outline" size={20} color="black" />
                     <Text style={styles.description}>Bandung</Text>
@@ -66,18 +70,12 @@ const Home = ({navigation, route}) => {
         signOut(firebaseAuth).then(() => {
             destroyKey();
             navigation.replace('Signin');
-        })
-    }
+        });
+    };
 
     return (
         <View style={{ flex: 1 }}>
-            {/* <ScrollView> */}
-            <Topback nama={dataUsers.fullname} userId={userId}/>
-            {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom:'20%'}}>
-                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', height: 52, width: 100, paddingHorizontal: 8, paddingVertical: 4, marginTop: 15, backgroundColor: '#DD310C', borderRadius: 10, }} onPress={handleLogout}>
-                        <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#ffffff' }}>Log Out</Text>
-                </TouchableOpacity>
-            </View> */}
+            <Topback nama={dataUsers.fullname} userId={userId} />
             <View style={styles.swiperContainer}>
                 <Swiper 
                     loop 
@@ -107,14 +105,13 @@ const Home = ({navigation, route}) => {
             
             <View style={styles.flatListContainer}>
                 <FlatList
-                    data={images}
+                    data={peralatan}
                     renderItem={renderItem}
-                    keyExtractor={(item, index) => index.toString()}
+                    keyExtractor={(item) => item.id}
                     numColumns={2}
                     contentContainerStyle={styles.flatListContent}
                 />
             </View>
-            {/* </ScrollView> */}
             <Navbar route={route}/>
         </View>
     );
@@ -153,7 +150,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#000',
     },
     card: {
-        width: 160, // Explicitly set the width // Explicitly set the height
+        width: 160,
         backgroundColor: '#fff',
         borderRadius: 10,
         shadowColor: '#000',
