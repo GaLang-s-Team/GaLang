@@ -13,13 +13,21 @@ export default function Topback ({nama, userId}) {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        setIsLoading(true)
-        const docRef = doc(firestore, "users", userId)
-        getDoc(docRef).then((doc) => {
-        setDataUsers(doc.data())
-        }).finally(() => {
-        setIsLoading(false)
-        })
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const docRef = doc(firestore, "users", userId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setDataUsers(docSnap.data());
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
     }, [userId]);
 
     return (

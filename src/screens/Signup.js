@@ -193,11 +193,11 @@ const Signup = () => {
                             onChangeText={inputChangeHandler.bind(this, 'password')}
                         />
                     </View>
-                <View style={{ marginVertical: 1,flexDirection: 'row', alignItems: 'center', marginTop: 15, marginHorizontal: 20, }}>
+                {/* <View style={{ marginVertical: 1,flexDirection: 'row', alignItems: 'center', marginTop: 15, marginHorizontal: 20, }}> */}
                     {/* Check box */}
-                    <Checkbox value={isChecked} onValueChange={setChecked} style={{ marginRight:10 }} color={isChecked ? '#459708' : undefined}/>
+                    {/* <Checkbox value={isChecked} onValueChange={setChecked} style={{ marginRight:10 }} color={isChecked ? '#459708' : undefined}/>
                     <Text style = {{ paddingLeft: 15, fontSize:12, fontWeight:'bold', color: '#459708' }}>remember me</Text>
-                </View>
+                </View> */}
                 <Button children={'Sign Up'} onPress={handleRegister}/>
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                         <Text style={{ fontSize: 14, color: '#004268' }}>Already Have An Account?</Text>
@@ -248,7 +248,7 @@ const style= StyleSheet.create({
     },
     form : {
         width: 338,
-        height: 336,
+        height: 300,
         backgroundColor:'#FFFFFF',
         borderRadius: 28,
         marginBottom: 'auto',

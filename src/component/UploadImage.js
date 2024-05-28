@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, } from 'react-native';
 import React, { useState } from 'react'
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
@@ -54,9 +54,19 @@ const UploadImage = ({ fullname, onImageUpload,imageUri }) => {
                 <View style={{ alignItems: 'center' }}>
                     {imagePreview}
                 </View>
-                <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 15, width: '100%' }}>
-                    <Button onPress={UploadImageHandler}>Upload Image</Button>
-                </View>
+                <TouchableOpacity style={{
+                    justifyContent: 'center',
+                    height: 45,
+                    width: 130,
+                    alignItems: 'center',
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    marginTop: 20,
+                    backgroundColor: '#459708',
+                    borderRadius: 50,
+                }}onPress={UploadImageHandler}>
+                    <Text style={{fontSize: 16, color:'white', fontWeight: 'bold' }}>Upload Image</Text>
+                </TouchableOpacity>
             </View>
     )
 }
