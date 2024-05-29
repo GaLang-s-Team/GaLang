@@ -3,8 +3,9 @@ import { View, StyleSheet, Image, Dimensions, Text, TouchableOpacity, FlatList }
 import Swiper from 'react-native-swiper';
 import Topback from "../component/Topback";
 import { Ionicons } from '@expo/vector-icons';
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, DocumentSnapshot } from 'firebase/firestore';
 import { destroyKey, getKey } from '../config/localStorage'
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { firebaseAuth, firestore } from '../config/firebase'
 import { signOut } from 'firebase/auth'
 import { useNavigation } from '@react-navigation/native';
@@ -15,9 +16,12 @@ const Home = ({ navigation, route }) => {
     const { userId } = route.params;
     const [dataUsers, setDataUsers] = useState({});
     const [peralatan, setPeralatan] = useState([]);
+    const [imageUrls, setImageUrls] = useState({});
     const isFocused = useIsFocused();
     const [isLoading, setIsLoading] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
+    const storage = getStorage();
+
     const images = [
         require('../../assets/Sepatu.jpg'),
         require('../../assets/Sepatu.jpg'),
@@ -37,7 +41,20 @@ const Home = ({ navigation, route }) => {
             const peralatanCollection = collection(firestore, "peralatan");
             const peralatanSnapshot = await getDocs(peralatanCollection);
             const peralatanList = peralatanSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            // Fetch image URLs for each peralatan
+            const urls = {};
+            await Promise.all(peralatanList.map(async (item) => {
+                if (item.foto) {
+                    const urlArray = item.foto.split(',');
+                    if (urlArray.length > 0) {
+                        urls[item.id] = urlArray[0].trim(); // Use the first URL
+                    }
+                }
+            }));
+
             setPeralatan(peralatanList);
+            setImageUrls(urls);
         };
 
         fetchPeralatan().finally(() => {
@@ -53,7 +70,7 @@ const Home = ({ navigation, route }) => {
 
     const renderItem = ({ item }) => (
         <TouchableOpacity style={styles.card}>
-            <Image source={images[0]} style={styles.image} />
+            <Image source={{ uri: imageUrls[item.id] }} style={styles.image} />
             <View style={styles.cardContent}>
                 <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">{item.nama}</Text>
                 <Text style={styles.title}>Rp{item.harga}</Text>
