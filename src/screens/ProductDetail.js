@@ -1,33 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, FlatList, Modal, TouchableWithoutFeedback, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Swiper from 'react-native-swiper';
 import { LinearGradient } from 'expo-linear-gradient';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+
+import { firestore } from '../config/firebase';
 
 
-export default function ProductDetail({ navigation }) {
-  const [isBuyModalVisible, setBuyModalVisible] = useState(false);
-  const [selectedSize, setSelectedSize] = useState(null);
-  const [quantity, setQuantity] = useState(1);
+export default function PeralatanDetail({ navigation, route }) {
+  const { peralatanId, penyediaId } = route.params;
+  const { userId } = route.params;
+
+  const [peralatanImages, setPeralatanImages] = useState([]);
+  const [peralatanNama, setPeralatanNama] = useState('');
+  const [peralatanHarga, setPeralatanHarga] = useState('');
+  const [peralatanRating, setPeralatanRating] = useState('');
+  const [peralatanDisewa, setPeralatanDisewa] = useState('');
+  const [peralatanDeskripsi, setPeralatanDeskripsi] = useState('');
   
-  const sizes = ['S', 'M', 'L', 'XL'];
-  const similarProducts = [
-    // Data produk serupa
-    { id: '1', name: 'Product 1', image: 'https://via.placeholder.com/100', price: '10000' },
-    { id: '2', name: 'Product 2', image: 'https://via.placeholder.com/100', price: '15000' },
+  const [penyedia, setPenyedia] = useState(null);
+  const [penyediaProfile, setPenyediaProfile] = useState(null);
+
+  const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [sizes, setSizes] = useState([]);
+  const [isBuyModalVisible, setBuyModalVisible] = useState(false);
+  
+  const similarPeralatans = [
+    // Data peralatan serupa
+    { id: '1', name: 'Peralatan 1', image: 'https://via.placeholder.com/100', price: '10000' },
+    { id: '2', name: 'Peralatan 2', image: 'https://via.placeholder.com/100', price: '15000' },
   ];
+
+  useEffect(() => {
+    const fetchPeralatanAndPenyedia = async () => {
+      try {
+        const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', 'Bsnxp7k99qSKKYBDJ4kRluQcrwC2-2'));
+        const peralatanDoc = await getDocs(peralatanRef);
+        if (peralatanDoc) {
+          peralatanDoc.forEach(documentSnapshot => {
+            setPeralatanImages(documentSnapshot.data().foto.split(','));
+            setPeralatanNama(documentSnapshot.data().nama);
+            setPeralatanHarga(formatHarga(documentSnapshot.data().harga));
+            setPeralatanRating(formatRating(documentSnapshot.data().rating));
+            setPeralatanDisewa(documentSnapshot.data().disewa);
+            setPeralatanDeskripsi(documentSnapshot.data().deskripsi)
+            setPenyedia(documentSnapshot.data().penyedia);
+          });
+        } else {
+          console.log('No such peralatan!');
+        }
+
+        const penyediaRef = query(collection(firestore, 'penyedia'), where('id_pengguna', '==', penyedia));
+        const penyediaDoc = await getDocs(penyediaRef);
+        if (penyediaDoc) {
+          penyediaDoc.forEach(documentSnapshot => {
+            setPenyediaProfile(documentSnapshot.data().profil);
+          });
+        } else {
+          console.log('No such penyedia!');
+        }
+      } catch (error) {
+        console.error('Error fetching peralatan or penyedia:', error);
+      } finally {
+        
+      }
+    };
+
+    fetchPeralatanAndPenyedia();
+  }, [peralatanId, penyediaId]);
 
   const toggleBuyModal = () => {
     setBuyModalVisible(!isBuyModalVisible);
   };
 
   const handleAddToCart = () => {
-    Alert.alert('Success', 'Product added to cart!');
+    Alert.alert('Success', 'Peralatan added to cart!');
   };
 
   const handleQuantityChange = (change) => {
     setQuantity((prevQuantity) => Math.max(1, prevQuantity + change));
   };
+
+  function formatHarga(num) {
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+  }
+
+  function formatRating(num) {
+    if (num != 9) return `★${num}`;
+    else return `Belum Diulas`;
+  }
 
   return (
     <View style={styles.container}>
@@ -36,7 +99,7 @@ export default function ProductDetail({ navigation }) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name='arrow-back' size={24} color='#FFFFFF' />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.shareButton} onPress={() => Alert.alert('Share', 'Share this product!')}>
+          <TouchableOpacity style={styles.shareButton} onPress={() => Alert.alert('Share', 'Share this peralatan!')}>
             <Ionicons name='share-social' size={24} color='#FFFFFF' />
           </TouchableOpacity>
         </View>
@@ -45,23 +108,23 @@ export default function ProductDetail({ navigation }) {
             <Ionicons name='chevron-back' size={24} color='white' />
           </TouchableOpacity>
           <Swiper showsPagination={false} loop>
-            <Image source={{ uri: 'https://via.placeholder.com/300' }} style={styles.productImage} />
-            <Image source={{ uri: 'https://via.placeholder.com/300' }} style={styles.productImage} />
-            <Image source={{ uri: 'https://via.placeholder.com/300' }} style={styles.productImage} />
+            <Image source={{ uri: peralatanImages[0] }} style={styles.peralatanImage} />
+            <Image source={{ uri: peralatanImages[1] }} style={styles.peralatanImage} />
+            <Image source={{ uri: peralatanImages[2] }} style={styles.peralatanImage} />
           </Swiper>
           <TouchableOpacity style={styles.arrowRight}>
             <Ionicons name='chevron-forward' size={24} color='white' />
           </TouchableOpacity>
         </View>
-        <View style={styles.productDetails}>
-          <Text style={styles.productName}>Nama Produk</Text>
-          <Text style={styles.productPrice}>Rp50.000</Text>
-          <Text style={styles.productHighlight}>Rating: ★★★★☆</Text>
-          <Text style={styles.productHighlight}>Disewa: 1000 kali</Text>
+        <View style={styles.peralatanDetails}>
+          <Text style={styles.peralatanName}>{peralatanNama}</Text>
+          <Text style={styles.peralatanPrice}>Rp{peralatanHarga}</Text>
+          <Text style={styles.peralatanHighlight}>Rating: {peralatanRating}</Text>
+          <Text style={styles.peralatanHighlight}>Disewa: {peralatanDisewa}</Text>
         </View>
         <View style={styles.storeProfile}>
           <TouchableOpacity onPress={() => Alert.alert('Store', 'Go to store page!')}>
-            <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.storeImage} />
+            <Image source={{ uri: penyediaProfile }} style={styles.storeImage} />
           </TouchableOpacity>
           <View style={styles.storeInfo}>
             <Text style={styles.storeName}>Toko</Text>
@@ -70,17 +133,17 @@ export default function ProductDetail({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.productDescription}>
-          <Text style={styles.sectionTitle}>Deskripsi Produk</Text>
-          <Text style={styles.sectionDescription}>Ini adalah deskripsi produk yang sangat lengkap.</Text>
+        <View style={styles.peralatanDescription}>
+          <Text style={styles.sectionTitle}>Deskripsi Peralatan</Text>
+          <Text style={styles.sectionDescription}>{peralatanDeskripsi}</Text>
         </View>
-        <View style={styles.similarProducts}>
-          <Text style={styles.sectionTitle}>Produk Serupa</Text>
+        <View style={styles.similarPeralatans}>
+          <Text style={styles.sectionTitle}>Peralatan Serupa</Text>
           <FlatList
-            data={similarProducts}
+            data={similarPeralatans}
             renderItem={({ item }) => (
-              <View style={styles.similarProductCard}>
-                <Image source={{ uri: item.image }} style={styles.similarProductImage} />
+              <View style={styles.similarPeralatanCard}>
+                <Image source={{ uri: item.image }} style={styles.similarPeralatanImage} />
                 <Text style={styles.sectionDescription}>{item.name}</Text>
                 <Text style={styles.sectionDescription}>Rp{item.price}</Text>
               </View>
@@ -185,24 +248,24 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 5,
   },
-  productImage: {
+  peralatanImage: {
     width: '100%',
     height: '100%',
   },
-  productDetails: {
+  peralatanDetails: {
     padding: 10,
   },
-  productName: {
+  peralatanName: {
     color: '#004268',
     fontSize: 24,
     fontWeight: 'bold',
   },
-  productPrice: {
+  peralatanPrice: {
     color: '#004268',
     fontSize: 20,
     marginVertical: 5,
   },
-  productHighlight: {
+  peralatanHighlight: {
     color: '#004268',
     fontSize: 16,
   },
@@ -234,7 +297,7 @@ const styles = StyleSheet.create({
   visitStore: {
     color: '#004268',
   },
-  productDescription: {
+  peralatanDescription: {
     padding: 10,
   },
   sectionTitle: {
@@ -246,15 +309,15 @@ const styles = StyleSheet.create({
   sectionDescription: {
     color: '#004268',
   },
-  similarProducts: {
+  similarPeralatans: {
     padding: 10,
   },
-  similarProductCard: {
+  similarPeralatanCard: {
     width: 100,
     alignItems: 'center',
     marginRight: 10,
   },
-  similarProductImage: {
+  similarPeralatanImage: {
     width: 100,
     height: 100,
     marginBottom: 5,
