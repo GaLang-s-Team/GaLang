@@ -27,7 +27,10 @@ const UpdateProfile = ({ route, navigation }) => {
     },
     gender: {
         value: route.params.gender, isValid: true
-    }
+    },
+    nomorTelp: {
+      value: '', isValid: true
+    },
   });
 
   const [isLoading, setIsLoading] = useState(false)
@@ -61,6 +64,7 @@ const UpdateProfile = ({ route, navigation }) => {
       const dataUpdate = {
         fullname: inputs.fullname.value ? inputs.fullname.value : route.params.fullname,
         gender: inputs.gender.value,
+        nomorTelp: inputs.nomorTelp.value ? inputs.nomorTelp.value : route.params.nomorTelp,
       };
 
       setIsLoading(true)
@@ -128,6 +132,7 @@ const UpdateProfile = ({ route, navigation }) => {
               fullname: inputs.fullname.value ? inputs.fullname.value : route.params.fullname,
               imageUri: downloadURL,
               gender: inputs.gender.value,
+              nomorTelp: inputs.nomorTelp.value ? inputs.nomorTelp.value : route.params.nomorTelp,
             };
 
             await updateDoc(colRef, dataUpdateWithImage);
@@ -171,6 +176,16 @@ const UpdateProfile = ({ route, navigation }) => {
             textInputConfig={{
               defaultValue: route.params.fullname,
               onChangeText: inputChangeHandler.bind(this, 'fullname')
+            }}
+          />
+        </View>
+        <View style={{ justifyContent: 'center', marginLeft: 20, marginRight: 20 }}>
+          <Input
+            label="No. Telp"
+            invalid={!inputs.nomorTelp.isValid}
+            textInputConfig={{
+              defaultValue: route.params.nomorTelp,
+              onChangeText: inputChangeHandler.bind(this, 'nomorTelp')
             }}
           />
         </View>

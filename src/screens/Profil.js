@@ -82,6 +82,7 @@ const Profil = ({ navigation, route }) => {
                         fullname: dataUsers.fullname,
                         imageUri: dataUsers.imageUri,
                         gender: dataUsers.gender,
+                        nomorTelp: dataUsers.nomorTelp
                     })}
                 >
                     <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#ffffff' }}>Edit Profil</Text>
@@ -123,7 +124,7 @@ const Profil = ({ navigation, route }) => {
                                 // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
                                 style={{ width: 39, height: 39, borderRadius: 50 }}
                             />
-                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.email}</Text>
+                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.nomorTelp}</Text>
                     </View>
                 </View>
                 <TouchableOpacity style={styles.tags} onPress={handleLogout}>
