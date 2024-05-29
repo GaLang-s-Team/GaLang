@@ -41,6 +41,7 @@ const Profil = ({ navigation, route }) => {
     
 
     return (
+        <>        
         <View style={{ flex: 1, backgroundColor: 'white' }}>
             <Image 
                 source={require('../../assets/Abstrackprof.png')} 
@@ -90,7 +91,7 @@ const Profil = ({ navigation, route }) => {
             </View>
 
             <Text style={{ marginLeft: '10%', marginTop: '5%', fontSize: 20, fontWeight: 'bold', color: '#004268', textAlign: 'justify' }}>Profile</Text>
-            <ScrollView>
+            
                 <View style={{ marginHorizontal: 'auto' }}>
                     <View style={styles.tags}>
                             <Image source={require('../../assets/Profile.png')}
@@ -134,9 +135,9 @@ const Profil = ({ navigation, route }) => {
                             />
                             <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268' }}>Log Out</Text>
                 </TouchableOpacity>
-            </ScrollView>
-            <Navbar route={route} />
         </View>
+        <Navbar route={route} />
+        </>
     );
 };
 
