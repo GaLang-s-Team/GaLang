@@ -10,7 +10,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import TopbarBack from '../component/TopbarBack';
 import { firestore, storage } from '../config/firebase';
 
-export default function AddPeralatanScreen({ navigation, route }) {
+export default function PeralatanInsert({ navigation, route }) {
   const [images, setImages] = useState([null, null, null]);
   const [peralatanName, setPeralatanName] = useState('');
   const [peralatanPrice, setPeralatanPrice] = useState('');
@@ -126,7 +126,7 @@ export default function AddPeralatanScreen({ navigation, route }) {
   return (
     <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView contentContainerStyle={styles.container}>
-        <TopbarBack title={'Tambah Peralatan'}/>
+        <TopbarBack navigation={navigation} title={'Tambah Peralatan'}/>
         <Text style={styles.subtitle}>Foto Peralatan</Text>
         <View style={styles.imageContainer}>
           {images.map((image, index) => (
