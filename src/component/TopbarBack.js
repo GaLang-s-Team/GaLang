@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 
-export default function TopbarBack({title}) {
+export default function TopbarBack({navigation, title}) {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#51B309', '#459708']} style={styles.container}/>
