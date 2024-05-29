@@ -26,7 +26,6 @@ export default function Search({ navigation, route }) {
       const peralatanDoc = await getDocs(peralatanRef);
       const results = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setSearchResults(results);
-      console.log('Search results: ', results);
     } catch (error) {
       console.error('Error searching: ', error);
     } finally {
