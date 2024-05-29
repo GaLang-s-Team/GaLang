@@ -30,6 +30,7 @@ export default function Search({ navigation, route }) {
       console.error('Error searching: ', error);
     } finally {
       setLoading(false);
+      setSearchQuery('');
     }
   }
 
