@@ -9,11 +9,9 @@ export default function TopbarBack({navigation, title}) {
     <View style={styles.container}>
       <LinearGradient colors={['#51B309', '#459708']} style={styles.container}/>
       <View style={styles.backButton}>
-        <Link href='/'>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name='arrow-back' size={24} color='#5E5F60' />
-          </TouchableOpacity>
-        </Link>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name='arrow-back' size={24} color='#5E5F60' />
+        </TouchableOpacity>
       </View>
       <View style={{width:'100%', height:100, alignItems:'center', justifyContent:'center', position:'absolute'}}>
         <Text style={{color:'#FFFFFF', fontWeight:'bold', fontSize:21}}>{title}</Text>

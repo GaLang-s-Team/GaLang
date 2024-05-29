@@ -1,34 +1,49 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { useIsFocused } from '@react-navigation/native';
 import { doc, getDoc } from 'firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
+
 import { firebaseAuth, firestore } from '../config/firebase'
 import { destroyKey, getKey } from '../config/localStorage'
 
 export default function Topback ({nama, userId}) {
+    const navigation = useNavigation();
+
     const [dataUsers, setDataUsers] = useState([])
     const [isLoading, setIsLoading] = useState(false);
+
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const docRef = doc(firestore, "users", userId);
+                const docRef = doc(firestore, 'users', userId);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     setDataUsers(docSnap.data());
                 }
             } catch (error) {
-                console.error("Error fetching user data:", error);
+                console.error('Error fetching user data:', error);
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
     }, [userId]);
+
+    const handleSearch = async () => {
+        if (!searchQuery.trim()) {
+          return;
+        }
+
+        navigation.navigate('Search', { userId: userId, keyword: searchQuery });
+        setSearchQuery('');
+    };
 
     return (
         <View style={styles.container}>
@@ -44,23 +59,24 @@ export default function Topback ({nama, userId}) {
                 </View>
                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', marginRight: '5%' }}>
                     <TouchableOpacity>
-                        <Ionicons name="settings-outline" size={24} color="white" style={{ marginRight: 15 }} />
+                        <Ionicons name='settings-outline' size={24} color='white' style={{ marginRight: 15 }} />
                     </TouchableOpacity>
                     <TouchableOpacity>
-                        <Ionicons name="notifications-outline" size={24} color="white" style={{ marginRight: 10 }} />
+                        <Ionicons name='notifications-outline' size={24} color='white' style={{ marginRight: 10 }} />
                     </TouchableOpacity>
                 </View>
             </View>
-            <View style={{ borderRadius: 30, marginHorizontal: 'auto', paddingHorizontal: 15, borderColor: '#C2C2C2', flexDirection: 'row', alignItems: 'center', height: 48, width: 335, backgroundColor: '#FFFFFF' }}>
-                            <Ionicons name="search-outline" size={24} color="gray" style={{ marginRight: 10, }} />
-                            
-                            <TextInput
-                                style={{ flex: 1, paddingLeft:15 }}
-                                placeholder='Search Your Gear'
-                                label={"Search"}
-                                // invalid={!inputs.email.isValid}
-                                // onChangeText={inputChangeHandler.bind(this, 'email')}
-                            />
+            <View style={{ borderRadius: 30, marginHorizontal: 'auto', paddingHorizontal: 15, borderColor: '#004268', flexDirection: 'row', alignItems: 'center', height: 45, width: '90%', backgroundColor: '#FFFFFF' }}>
+                <Ionicons name='search-outline' size={24} color='#004268' style={{ marginRight: 10 }} />
+                <TextInput
+                    style={{ flex: 1, paddingLeft:15 }}
+                    color='#004268'
+                    placeholder='Search Your Gear...'
+                    label={'Search'}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    onSubmitEditing={handleSearch}
+                />
             </View>
         </LinearGradient>
         </View>
