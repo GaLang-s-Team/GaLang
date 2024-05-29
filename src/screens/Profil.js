@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { firebaseAuth, firestore } from '../config/firebase';
 import { destroyKey } from '../config/localStorage';
@@ -88,37 +88,51 @@ const Profil = ({ navigation, route }) => {
                 </TouchableOpacity>
             </View>
 
-            <Text style={{ marginLeft: '10%', marginTop: '10%', fontSize: 20, fontWeight: 'bold', color: '#004268', textAlign: 'justify' }}>Profile</Text>
+            <Text style={{ marginLeft: '10%', marginTop: '5%', fontSize: 20, fontWeight: 'bold', color: '#004268', textAlign: 'justify' }}>Profile</Text>
             <ScrollView>
-                <View style={{ marginLeft: '10%' }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', height: 52, width: 310, paddingHorizontal: 8, paddingVertical: 4, marginTop: 15, backgroundColor: '#E4E7C9', borderRadius: 10 }}>
-                        <Ionicons name="person-outline" style={{ paddingLeft: 10, color: '#459708' }} size={24} color="gray" />
-                        <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268' }}>{dataUsers.fullname}</Text>
+                <View style={{ marginHorizontal: 'auto' }}>
+                    <View style={styles.tags}>
+                            <Image source={require('../../assets/Profile.png')}
+                                // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
+                                style={{ width: 39, height: 39, borderRadius: 50 }}
+                            />
+                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.fullname}</Text>
                     </View>
                 </View>
-                <View style={{ marginLeft: '10%' }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', height: 52, width: 310, paddingHorizontal: 8, paddingVertical: 4, marginTop: 15, backgroundColor: '#E4E7C9', borderRadius: 10 }}>
-                        <Ionicons name="mail-outline" style={{ paddingLeft: 10, color: '#459708' }} size={24} color="gray" />
-                        <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268' }}>{dataUsers.email}</Text>
+                <View style={{ marginHorizontal: 'auto' }}>
+                    <View style={styles.tags}>
+                            <Image source={require('../../assets/Email.png')}
+                                // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
+                                style={{ width: 39, height: 39, borderRadius: 50 }}
+                            />
+                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.email}</Text>
                     </View>
                 </View>
-                <View style={{ marginLeft: '10%' }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', height: 52, width: 310, paddingHorizontal: 8, paddingVertical: 4, marginTop: 15, backgroundColor: '#E4E7C9', borderRadius: 10 }}>
-                        <Ionicons name="male-female" style={{ paddingLeft: 10, color: '#459708' }} size={24} color="gray" />
-                        <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268' }}>{dataUsers.gender ? 'Laki-laki' : 'Perempuan'}</Text>
+                <View style={{ marginHorizontal: 'auto' }}>
+                    <View style={styles.tags}>
+                            <Image source={require('../../assets/gender.png')}
+                                // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
+                                style={{ width: 39, height: 39, borderRadius: 50 }}
+                            />
+                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.gender ? 'Laki-laki': 'Perempuan'}</Text>
                     </View>
                 </View>
-                <View style={{ marginLeft: '10%' }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', height: 52, width: 310, paddingHorizontal: 8, paddingVertical: 4, marginTop: 15, backgroundColor: '#E4E7C9', borderRadius: 10 }}>
-                        <Ionicons name="male-female" style={{ paddingLeft: 10, color: '#459708' }} size={24} color="gray" />
-                        <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268' }}>{dataUsers.gender ? 'Laki-laki' : 'Perempuan'}</Text>
+                <View style={{ marginHorizontal: 'auto' }}>
+                    <View style={styles.tags}>
+                            <Image source={require('../../assets/Phone.png')}
+                                // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
+                                style={{ width: 39, height: 39, borderRadius: 50 }}
+                            />
+                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.email}</Text>
                     </View>
                 </View>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: '10%' }}>
-                    <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', height: 45, width: 100, paddingHorizontal: 8, paddingVertical: 4, marginTop: 35, backgroundColor: '#DD310C', borderRadius: 10 }} onPress={handleLogout}>
-                        <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#ffffff' }}>Log Out</Text>
-                    </TouchableOpacity>
-                </View>
+                <TouchableOpacity style={styles.tags} onPress={handleLogout}>
+                            <Image source={require('../../assets/Logout.png')}
+                                // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
+                                style={{ width: 39, height: 39, borderRadius: 50 }}
+                            />
+                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268' }}>Log Out</Text>
+                </TouchableOpacity>
             </ScrollView>
             <Navbar route={route} />
         </View>
@@ -126,3 +140,25 @@ const Profil = ({ navigation, route }) => {
 };
 
 export default Profil;
+
+const styles = StyleSheet.create({
+    tags : {
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        height: 59, 
+        width: 332, 
+        paddingHorizontal: 15, 
+        paddingVertical: 4, 
+        marginTop: 15, 
+        marginHorizontal: 'auto',
+        backgroundColor: 'white', 
+        borderRadius: 10, 
+        shadowColor: "#000",
+        shadowOffset:{
+            height: -20
+        },
+        shadowOpacity: 0.10,
+        shadowRadius: 3.84,
+        elevation: 5,
+    }
+})
