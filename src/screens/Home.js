@@ -3,7 +3,7 @@ import { View, StyleSheet, Image, Dimensions, Text, TouchableOpacity, FlatList }
 import Swiper from 'react-native-swiper';
 import Topback from "../component/Topback";
 import { Ionicons } from '@expo/vector-icons';
-import { doc, getDoc, collection, getDocs, DocumentSnapshot } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { destroyKey, getKey } from '../config/localStorage'
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { firebaseAuth, firestore } from '../config/firebase'
@@ -11,6 +11,7 @@ import { signOut } from 'firebase/auth'
 import { useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import Navbar from "../component/Navbar";
+import { LinearGradient } from 'expo-linear-gradient';
 
 const Home = ({ navigation, route }) => {
     const { userId } = route.params;
@@ -31,36 +32,47 @@ const Home = ({ navigation, route }) => {
     ];
 
     useEffect(() => {
-        setIsLoading(true);
-        const docRef = doc(firestore, "users", userId);
-        getDoc(docRef).then((doc) => {
-            setDataUsers(doc.data());
-        });
+    setIsLoading(true);
+    const docRef = doc(firestore, "users", userId);
+    getDoc(docRef).then((doc) => {
+        setDataUsers(doc.data());
+    });
 
-        const fetchPeralatan = async () => {
-            const peralatanCollection = collection(firestore, "peralatan");
-            const peralatanSnapshot = await getDocs(peralatanCollection);
-            const peralatanList = peralatanSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
-            // Fetch image URLs for each peralatan
-            const urls = {};
-            await Promise.all(peralatanList.map(async (item) => {
-                if (item.foto) {
-                    const urlArray = item.foto.split(',');
-                    if (urlArray.length > 0) {
-                        urls[item.id] = urlArray[0].trim(); // Use the first URL
-                    }
+    const fetchPeralatan = async () => {
+        const peralatanCollection = collection(firestore, "peralatan");
+        let peralatanSnapshot;
+        
+        if (dataUsers.role === 'Penyedia') {
+            // Jika penyedia, hanya tampilkan peralatan yang dimilikinya
+            const q = query(peralatanCollection, where("penyedia", "==", userId));
+            peralatanSnapshot = await getDocs(q);
+        } else {
+            // Jika penyewa, tampilkan semua peralatan
+            peralatanSnapshot = await getDocs(peralatanCollection);
+        }
+        
+        const peralatanList = peralatanSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Fetch image URLs for each peralatan
+        const urls = {};
+        await Promise.all(peralatanList.map(async (item) => {
+            if (item.foto) {
+                const urlArray = item.foto.split(',');
+                if (urlArray.length > 0) {
+                    urls[item.id] = urlArray[0].trim(); // Use the first URL
                 }
-            }));
+            }
+        }));
 
-            setPeralatan(peralatanList);
-            setImageUrls(urls);
-        };
+        setPeralatan(peralatanList);
+        setImageUrls(urls);
+    };
 
-        fetchPeralatan().finally(() => {
-            setIsLoading(false);
-        });
-    }, [userId]);
+    fetchPeralatan().finally(() => {
+        setIsLoading(false);
+    });
+}, [userId, dataUsers.role]);
+
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -97,33 +109,58 @@ const Home = ({ navigation, route }) => {
     return (
         <View style={{ flex: 1 }}>
             <Topback nama={dataUsers.fullname} userId={userId} />
-            <View style={styles.swiperContainer}>
-                <Swiper 
-                    loop 
-                    autoplay 
-                    autoplayTimeout={2}
-                    onIndexChanged={(index) => setActiveIndex(index)}
-                    showsPagination={false}
-                    style={styles.swiper}
-                >
-                    {images.map((image, index) => (
-                        <Image key={index} source={image} style={styles.image} />
-                    ))}
-                </Swiper>
-            </View>
-            <View style={styles.paginationContainer}>
-                {images.map((_, index) => (
-                    <View 
-                        key={index} 
-                        style={[
-                            styles.dot, 
-                            activeIndex === index ? styles.activeDot : styles.inactiveDot
-                        ]} 
-                    />
-                ))}
-            </View>
-            <Text style={{ marginHorizontal:'auto', marginLeft: 30, marginVertical: 20, fontWeight:'bold',color:'#004268', fontSize: 16 }}>Perlengkapan Outdoor-mu</Text>
-            
+
+            {dataUsers.role === 'Penyewa' && (
+                <>
+                    <View style={styles.swiperContainer}>
+                        <Swiper
+                            loop
+                            autoplay
+                            autoplayTimeout={2}
+                            onIndexChanged={(index) => setActiveIndex(index)}
+                            showsPagination={false}
+                            style={styles.swiper}
+                        >
+                            {images.map((image, index) => (
+                                <Image key={index} source={image} style={styles.image} />
+                            ))}
+                        </Swiper>
+                    </View>
+                    <View style={styles.paginationContainer}>
+                        {images.map((_, index) => (
+                            <View
+                                key={index}
+                                style={[
+                                    styles.dot,
+                                    activeIndex === index ? styles.activeDot : styles.inactiveDot
+                                ]}
+                            />
+                        ))}
+                    </View>
+                    <Text style={{ marginHorizontal: 'auto', marginLeft: 30, marginVertical: 20, fontWeight: 'bold', color: '#004268', fontSize: 16 }}>Perlengkapan Outdoor-mu</Text>
+                </>
+            )}
+            {dataUsers.role === 'Penyedia' && (
+                <>
+                    <View style={{ flexDirection: 'row', marginHorizontal: 'auto', marginTop: 22, alignItems: 'center', justifyContent: 'space-between' }}>
+                        <TouchableOpacity style={{ marginHorizontal: '3%' }}>
+                            <View style={{flexDirection: "column", height: 77, width: 155, backgroundColor: '#63D211', borderRadius: 10, alignItems: 'center',}}>
+                                <LinearGradient colors={['#63D211', '#459708']} style={styles.buttonLinear}/>
+                                <Ionicons name="bag-handle-outline" size={40} color="white" style={{marginHorizontal: 'auto', marginTop: '4%'}}/>
+                                <Text style={{ color: 'white', fontWeight: 'bold', marginTop: 2}}>Tambahkan Produk</Text>
+                            </View> 
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ marginHorizontal: '2%' }}>
+                            <View style={{ height: 77, width: 155, backgroundColor: '#63D211', borderRadius: 10, alignItems: 'center'}}>
+                                <LinearGradient colors={['#63D211', '#459708']} style={styles.buttonLinear}/>
+                                <Ionicons name="cash-outline" size={40} color="white" style={{marginHorizontal: 'auto', marginTop: '4%'}}/>
+                                <Text style={{ color: 'white', fontWeight: 'bold', marginTop: 2}}>Pembayaran</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={{ marginHorizontal: 'auto', marginLeft: 40, marginVertical: 20, fontWeight: 'bold', color: '#004268', fontSize: 16 }}>Katalog Produk</Text>
+                </>
+            )}
             <View style={styles.flatListContainer}>
                 <FlatList
                     data={peralatan}
@@ -212,7 +249,15 @@ const styles = StyleSheet.create({
     flatListContent: {
         flexGrow: 1,
         justifyContent: 'space-between',
-    },
+    },buttonLinear : {
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        width: 155,
+        height: 77,
+        top: 0,
+        borderRadius: 8,
+    }
 });
 
 export default Home;

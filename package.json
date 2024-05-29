@@ -32,6 +32,7 @@
     "react-native": "0.74.1",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-paper": "^5.12.3",
+    "react-native-picker-select": "^9.1.3",
     "react-native-swiper": "^1.6.0",
     "react-native-toast-notifications": "^3.4.0",
     "react-native-web": "~0.19.6"
