@@ -129,35 +129,35 @@ export default function Dashboard({ navigation, route }) {
     }
 
     return (
-        <View style={{ flex:1 }}>
-            <Topback nama={dataUsers.fullname} userId={userId} />
-            <Text style={{ marginHorizontal:'auto', marginLeft:20, marginTop:15, fontWeight:'bold',color:'#004268', fontSize:16 }}>Tagihan: Rp{tagihan}</Text>
-            <Text style={{ marginHorizontal:'auto', marginLeft:20, fontWeight:'bold',color:'#004268', fontSize:16 }}>Rating: ★{rating}</Text>
-            <View style={{ flexDirection:'row', justifyContent:'space-between', marginVertical:5, marginHorizontal:20 }}>
-              <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10, width:'47.5%'}} onPress={() => Alert.alert('Purchase', 'Proceed to payment!')}>
-                <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Bayar Tagihan</Text>
-              </Pressable>
-              <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10, width:'47.5%'}} onPress={handleBooster}>
-                <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Aktifkan Booster</Text>
-              </Pressable>
-            </View>
-            <View style={styles.container}>
-                <FlatList
-                    data={peralatan}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id}
-                    style={styles.flatListContainer}
-                    numColumns={2}
-                    columnWrapperStyle={styles.row}
-                    contentContainerStyle={styles.flatListContainer}
-                />
-            </View>
-            <TouchableOpacity style={{position:'absolute', backgroundColor:'#459708', width:35, height:35, bottom:70, right:25, borderRadius:50, justifyContent:'center', alignItems:'center'}}
-              onPress={() => navigation.navigate('PeralatanInsert', { userId: userId })}>
-              <Ionicons name='add' size={24} color='#FFFFFF' />
-            </TouchableOpacity>
-            <Navbar route={route}/>
-        </View>
+      <View style={{ flex:1 }}>
+          <Topback nama={dataUsers.fullname} userId={userId} />
+          <Text style={{ marginHorizontal:'auto', marginLeft:20, marginTop:15, fontWeight:'bold',color:'#004268', fontSize:16 }}>Tagihan: Rp{tagihan}</Text>
+          <Text style={{ marginHorizontal:'auto', marginLeft:20, fontWeight:'bold',color:'#004268', fontSize:16 }}>Rating: ★{rating}</Text>
+          <View style={{ flexDirection:'row', justifyContent:'space-between', marginVertical:5, marginHorizontal:20 }}>
+            <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10, width:'47.5%'}} onPress={() => Alert.alert('Purchase', 'Proceed to payment!')}>
+              <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Bayar Tagihan</Text>
+            </Pressable>
+            <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10, width:'47.5%'}} onPress={handleBooster}>
+              <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Aktifkan Booster</Text>
+            </Pressable>
+          </View>
+          <View style={styles.container}>
+              <FlatList
+                  data={peralatan}
+                  renderItem={renderItem}
+                  keyExtractor={(item) => item.id}
+                  style={styles.flatListContainer}
+                  numColumns={2}
+                  columnWrapperStyle={styles.row}
+                  contentContainerStyle={styles.flatListContainer}
+              />
+          </View>
+          <TouchableOpacity style={{position:'absolute', backgroundColor:'#459708', width:35, height:35, bottom:70, right:25, borderRadius:50, justifyContent:'center', alignItems:'center'}}
+            onPress={() => navigation.navigate('PeralatanInsert', { userId: userId })}>
+            <Ionicons name='add' size={24} color='#FFFFFF' />
+          </TouchableOpacity>
+          <Navbar route={route}/>
+      </View>
     );
   };
   
