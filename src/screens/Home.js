@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { View, StyleSheet, Image, Dimensions, Text, TouchableOpacity, FlatList } from 'react-native';
 import Swiper from 'react-native-swiper';
-import Topback from "../component/Topback";
+import Topback from '../component/Topback';
 import { Ionicons } from '@expo/vector-icons';
 import { doc, getDoc, collection, getDocs, DocumentSnapshot } from 'firebase/firestore';
 import { destroyKey, getKey } from '../config/localStorage'
@@ -10,7 +10,7 @@ import { firebaseAuth, firestore } from '../config/firebase'
 import { signOut } from 'firebase/auth'
 import { useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
-import Navbar from "../component/Navbar";
+import Navbar from '../component/Navbar';
 
 const Home = ({ navigation, route }) => {
     const { userId } = route.params;
@@ -32,13 +32,13 @@ const Home = ({ navigation, route }) => {
 
     useEffect(() => {
         setIsLoading(true);
-        const docRef = doc(firestore, "users", userId);
+        const docRef = doc(firestore, 'users', userId);
         getDoc(docRef).then((doc) => {
             setDataUsers(doc.data());
         });
 
         const fetchPeralatan = async () => {
-            const peralatanCollection = collection(firestore, "peralatan");
+            const peralatanCollection = collection(firestore, 'peralatan');
             const peralatanSnapshot = await getDocs(peralatanCollection);
             const peralatanList = peralatanSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
@@ -72,18 +72,23 @@ const Home = ({ navigation, route }) => {
         return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
     }
 
+    function formatRating(num) {
+        if (num != 0) return `★${num}`;
+        else return `Belum Diulas`;
+    }
+
     const renderItem = ({ item }) => (
-        <TouchableOpacity style={styles.card}>
-            <Image source={{ uri: imageUrls[item.id] }} style={styles.image} />
-            <View style={styles.cardContent}>
-                <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">{item.nama}</Text>
-                <Text style={styles.title}>Rp{formatHarga(item.harga)}</Text>
-                <Text style={styles.rating}>{'★'.repeat(item.rating)}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Ionicons name="location-outline" size={20} color="black" />
-                    <Text style={styles.description}>Bandung</Text>
-                </View>
+        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('PeralatanDetail', { peralatanId: item.id_peralatan })}>
+        <Image source={{ uri: item.foto.split(',')[0] }} style={styles.image} />
+        <View>
+            <Text style={styles.title} numberOfLines={1} ellipsizeMode='tail'>{item.nama}</Text>
+            <Text style={styles.harga}>Rp{formatHarga(item.harga)}</Text>
+            <Text style={styles.rating}>{formatRating(item.rating)}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name='location-outline' size={20} color='#004268' style={{ marginLeft:9, marginBottom:5 }}/>
+                <Text style={styles.location}>Bandung</Text>
             </View>
+        </View>
         </TouchableOpacity>
     );
 
@@ -93,21 +98,21 @@ const Home = ({ navigation, route }) => {
             navigation.replace('Signin');
         });
     };
-
+    
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex:1 }}>
             <Topback nama={dataUsers.fullname} userId={userId} />
             <View style={styles.swiperContainer}>
                 <Swiper 
                     loop 
                     autoplay 
-                    autoplayTimeout={2}
+                    autoplayTimeout={2.5}
                     onIndexChanged={(index) => setActiveIndex(index)}
                     showsPagination={false}
                     style={styles.swiper}
                 >
                     {images.map((image, index) => (
-                        <Image key={index} source={image} style={styles.image} />
+                        <Image key={index} source={image} style={styles.imageAnimation} />
                     ))}
                 </Swiper>
             </View>
@@ -122,15 +127,16 @@ const Home = ({ navigation, route }) => {
                     />
                 ))}
             </View>
-            <Text style={{ marginHorizontal:'auto', marginLeft: 30, marginVertical: 20, fontWeight:'bold',color:'#004268', fontSize: 16 }}>Perlengkapan Outdoor-mu</Text>
-            
-            <View style={styles.flatListContainer}>
+            <Text style={{ marginHorizontal:'auto', marginLeft:20, marginTop:10, fontWeight:'bold',color:'#004268', fontSize:16 }}>Temukan Perlengkapanmu!</Text>
+            <View style={styles.container}>
                 <FlatList
                     data={peralatan}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id}
+                    style={styles.flatListContainer}
                     numColumns={2}
-                    contentContainerStyle={styles.flatListContent}
+                    columnWrapperStyle={styles.row}
+                    contentContainerStyle={styles.flatListContainer}
                 />
             </View>
             <Navbar route={route}/>
@@ -140,17 +146,17 @@ const Home = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
     swiperContainer: {
-        marginTop: 26,
+        marginTop: 15,
         height: 126,
-        marginHorizontal: '8%',
+        marginHorizontal: 20,
         borderRadius: 15,
         overflow: 'hidden'
     },
     swiper: {
         borderRadius: 15
     },
-    image: {
-        width: Dimensions.get('window').width * 0.84,
+    imageAnimation: {
+        width: '100%',
         height: 126,
     },
     paginationContainer: {
@@ -170,49 +176,65 @@ const styles = StyleSheet.create({
     activeDot: {
         backgroundColor: '#000',
     },
-    card: {
-        width: 160,
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 5,
-        elevation: 5,
-        marginVertical: 10,
-        marginHorizontal: 5,
-    },
     image: {
         width: '100%',
         height: 120,
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
-    },
-    cardContent: {
-        padding: 15,
-    },
-    title: {
+      },
+      card: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        marginBottom: 15,
+        width: '48%',
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+      },
+      row: {
+        flex: 1,
+        justifyContent: 'space-between',
+      },
+      title: {
+        color: '#004268',
+        marginHorizontal: 10,
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 5,
-    },
-    description: {
+      },
+      harga: {
+        color: '#004268',
+        marginHorizontal: 10,
+        fontSize: 16,
+        marginBottom: 5,
+      },
+      location: {
+        color: '#004268',
         fontSize: 14,
         color: '#666',
-        paddingLeft: 5
-    },
-    rating: {
-        color: 'gold',
+        marginBottom: 5,
+      },
+      rating: {
+        color: '#004268',
         fontSize: 20,
-    },
-    flatListContainer: {
+        paddingLeft: 10,
+      },
+      container: {
         flex: 1,
-        marginHorizontal: 30,
-    },
-    flatListContent: {
+      },
+      flatListContainer: {
+        paddingHorizontal: 10,
+        paddingTop: 5,
+      },
+      flatListContent: {
+        width: '100%',
         flexGrow: 1,
-        justifyContent: 'space-between',
-    },
+      },
 });
 
 export default Home;
