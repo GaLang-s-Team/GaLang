@@ -68,12 +68,16 @@ const Home = ({ navigation, route }) => {
         });
     }, [isFocused, userId]);
 
+    function formatHarga(num) {
+        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+    }
+
     const renderItem = ({ item }) => (
         <TouchableOpacity style={styles.card}>
             <Image source={{ uri: imageUrls[item.id] }} style={styles.image} />
             <View style={styles.cardContent}>
                 <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">{item.nama}</Text>
-                <Text style={styles.title}>Rp{item.harga}</Text>
+                <Text style={styles.title}>Rp{formatHarga(item.harga)}</Text>
                 <Text style={styles.rating}>{'★'.repeat(item.rating)}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name="location-outline" size={20} color="black" />
