@@ -150,7 +150,7 @@ export default function AddPeralatanScreen({ navigation, route }) {
         <Text style={styles.subtitle}>Harga Peralatan</Text>
         <TextInput
           style={styles.input}
-          placeholder='Silahkan masukkan harga peralatan'
+          placeholder='Silahkan masukkan harga peralatan (tanpa tanda baca, misalnya: 100000)'
           placeholderTextColor={'rgba(0, 66, 104, 0.5)'}
           value={peralatanPrice}
           onChangeText={setPeralatanPrice}
