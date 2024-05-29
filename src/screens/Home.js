@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
         borderRadius: 15
     },
     imageAnimation: {
-        width: 90,
+        width: '100%',
         height: 126,
     },
     paginationContainer: {
