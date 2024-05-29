@@ -30,7 +30,6 @@ export default function Search({ navigation, route }) {
       console.error('Error searching: ', error);
     } finally {
       setLoading(false);
-      setSearchQuery('');
     }
   }
 
@@ -154,6 +153,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: '100%',
   },
   flatListContainer: {
     paddingHorizontal: 10,
