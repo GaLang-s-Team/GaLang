@@ -341,9 +341,9 @@ const UpdateProfile = ({ route, navigation }) => {
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
         duration={2000}
-        style={{ marginBottom: "2%", backgroundColor: '#ff0e0e', justifyContent: 'center', borderRadius: 29, marginBottom: '3%' }}
+        style={{ marginBottom: "2%", backgroundColor: '#BDE6AC', justifyContent: 'center', borderRadius: 29, marginBottom: '3%' }}
       >
-        <Text style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>
+        <Text style={{ textAlign: 'center', color: '#004268', fontWeight: 'bold' }}>
           {snackbarMessage}
         </Text>
       </Snackbar>
