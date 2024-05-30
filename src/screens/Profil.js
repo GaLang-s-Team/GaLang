@@ -8,6 +8,7 @@ import { useIsFocused } from '@react-navigation/native';
 import Navbar from '../component/Navbar';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
+import Dropdown from '../component/Dropdown';
 
 const Profil = ({ navigation, route }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -83,7 +84,9 @@ const Profil = ({ navigation, route }) => {
                         fullname: dataUsers.fullname,
                         imageUri: dataUsers.imageUri,
                         gender: dataUsers.gender,
-                        nomorTelp: dataUsers.nomorTelp
+                        nomorTelp: dataUsers.nomorTelp,
+                        provinsi: dataUsers.provinsi,
+                        kota: dataUsers.kota
                     })}
                 >
                     <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#ffffff' }}>Edit Profil</Text>
@@ -91,7 +94,7 @@ const Profil = ({ navigation, route }) => {
             </View>
 
             <Text style={{ marginLeft: '10%', marginTop: '5%', fontSize: 20, fontWeight: 'bold', color: '#004268', textAlign: 'justify' }}>Profile</Text>
-            
+                <ScrollView>
                 <View style={{ marginHorizontal: 'auto' }}>
                     <View style={styles.tags}>
                             <Image source={require('../../assets/Profile.png')}
@@ -128,6 +131,24 @@ const Profil = ({ navigation, route }) => {
                             <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.nomorTelp}</Text>
                     </View>
                 </View>
+                <View style={{ marginHorizontal: 'auto' }}>
+                    <View style={styles.tags}>
+                            <Image source={require('../../assets/Province.png')}
+                                // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
+                                style={{ width: 39, height: 39, borderRadius: 50 }}
+                            />
+                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.provinsi}</Text>
+                    </View>
+                </View>
+                <View style={{ marginHorizontal: 'auto' }}>
+                    <View style={styles.tags}>
+                            <Image source={require('../../assets/City.png')}
+                                // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
+                                style={{ width: 39, height: 39, borderRadius: 50 }}
+                            />
+                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.kota}</Text>
+                    </View>
+                </View>
                 <TouchableOpacity style={styles.tags} onPress={handleLogout}>
                             <Image source={require('../../assets/Logout.png')}
                                 // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
@@ -135,6 +156,8 @@ const Profil = ({ navigation, route }) => {
                             />
                             <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268' }}>Log Out</Text>
                 </TouchableOpacity>
+                </ScrollView>
+
         </View>
         <Navbar route={route} />
         </>
