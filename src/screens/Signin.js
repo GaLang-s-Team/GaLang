@@ -13,6 +13,7 @@ import { getKey, storeKey } from '../config/localStorage';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import Checkbox from 'expo-checkbox';
 import { Snackbar } from 'react-native-paper'; // Import Snackbar
+import RNPickerSelect from 'react-native-picker-select';
 
 const Signin = () => {
     let [fontsLoaded] = useFonts({
@@ -25,8 +26,12 @@ const Signin = () => {
     const [inputs, setInputs] = useState({
         email: { value: '', isValid: true },
         password: { value: '', isValid: true },
+        role: { value: '', isValid: true },
     });
+    const [role, setRole] = useState('');
 
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const categories = ['Penyedia', 'Penyewa'];
     const [snackbarVisible, setSnackbarVisible] = useState(false); // State untuk menampilkan Snackbar
     const [snackbarMessage, setSnackbarMessage] = useState(''); // Pesan yang akan ditampilkan di Snackbar
 
@@ -35,7 +40,11 @@ const Signin = () => {
             const data = res;
             console.log("data user: ", data);
             if (data) {
-                navigation.replace('Home', { userId: data });
+                if (data.role === 'Penyewa') {
+                    navigation.replace('Home', { userId: data.userId, role: data.role});
+                } else {
+                    navigation.replace('Dashboard', { userId: data.userId, role: data.role});
+                }
             }
         });
     }, []);
@@ -50,16 +59,20 @@ const Signin = () => {
         const dataLogin = {
             email: inputs.email.value,
             password: inputs.password.value,
+            role: inputs.role.value,
         };
 
         const emailIsValid = inputs.email.value.trim() !== '';
         const passwordIsValid = inputs.password.value.trim() !== '';
+        const roleIsValid = inputs.role.value.trim() !== "";
 
         if (!emailIsValid || !passwordIsValid) {
             setInputs((currentInputs) => ({
                 email: { value: currentInputs.email.value, isValid: emailIsValid },
                 password: { value: currentInputs.password.value, isValid: passwordIsValid },
+                role: { value: currentInputs.role.value, isValid: roleIsValid },
             }));
+            setRole(inputs.role.value);
             setSnackbarMessage('Please, check your input'); // Set pesan untuk Snackbar
             setSnackbarVisible(true); // Tampilkan Snackbar
             return;
@@ -71,6 +84,7 @@ const Signin = () => {
             const userCredential = await signInWithEmailAndPassword(firebaseAuth, dataLogin.email, dataLogin.password);
             const userId = userCredential.user.uid;
             const emailVerified = userCredential.user.emailVerified;
+            var role = inputs.role.value;
             console.log(userId)
 
             if (!emailVerified) {
@@ -78,8 +92,12 @@ const Signin = () => {
                 setSnackbarVisible(true); // Tampilkan Snackbar
                 return;
             } else {
-                storeKey('LOGGED_IN', userId);
-                navigation.replace('Home', { userId: userId });
+                storeKey('LOGGED_IN', {userId: userId, role: role});
+                if (role === 'Penyewa') {
+                    navigation.replace('Home', { userId: userId, role: this.role});
+                } else {
+                    navigation.replace('Dashboard', { userId: userId, role: this.role});
+                }
             }
         } catch (error) {
             const errorMessage = error.message;
@@ -142,6 +160,26 @@ const Signin = () => {
                             onChangeText={inputChangeHandler.bind(this, 'password')}
                         />
                     </View>
+                    <View style={{ width: 297, height: 51, borderWidth: 1, borderRadius: 8, marginHorizontal: 'auto', marginTop: 10, paddingHorizontal: 15, borderColor: '#C2C2C2', flexDirection: 'row', alignItems: 'center', }}>
+                    <Ionicons name="people-outline" size={24} color="gray" />
+                    <View style={{ flex: 1, alignItems: 'flex-end', }}>
+                        <RNPickerSelect
+                            onValueChange={(value) => inputChangeHandler('role', value)}
+                            items={[
+                                { label: 'Penyewa', value: 'Penyewa' },
+                                { label: 'Penyedia', value: 'Penyedia' },
+                            ]}
+                            placeholder={{ label: 'Select Role', value: null }}
+                            style={{
+                                ...pickerSelectStyles,
+                                placeholder: {
+                                    color: 'gray',
+                                    fontSize: 15,
+                                },
+                            }}
+                        />
+                    </View>
+                </View>
                 <View style={{ marginVertical: 1,flexDirection: 'row', alignItems: 'center', marginTop: 15, marginHorizontal: 20, }}>
                     {/* Check box */}
                     <Checkbox value={isChecked} onValueChange={setChecked} style={{ marginRight:10 }} color={isChecked ? '#459708' : undefined}/>
@@ -216,5 +254,41 @@ const style = StyleSheet.create({
         height: 56,
         top: 0,
         borderRadius: 8,
+    },
+    picker: {
+        height: 50,
+        borderColor: '#004268',
+        color: '#004268',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderRadius: 5,
+        marginHorizontal: 20,
+        marginBottom: 15,
+        marginTop: 1,
+    },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+    inputIOS: {
+        fontSize: 15,
+        paddingHorizontal: 10,
+        borderWidth: 1,
+        borderColor: 'gray',
+        borderRadius: 4,
+        color: 'black',
+        paddingRight: 30, // to ensure the text is never behind the icon
+    },
+    inputAndroid: {
+        fontSize: 15,
+        paddingHorizontal: 10,
+        borderWidth: 0.5,
+        borderColor: 'purple',
+        borderRadius: 8,
+        color: 'black',
+        paddingRight: 30, // to ensure the text is never behind the icon
+    },
+    placeholder: {
+        color: 'gray',
+        fontSize: 15,
     },
 });

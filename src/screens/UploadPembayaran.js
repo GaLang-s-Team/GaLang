@@ -8,8 +8,9 @@ import { update } from 'firebase/database';
 
 const { width } = Dimensions.get('window');
 
-const UploadPembayaran = () => {
-    const transactionID = 'transaksi1';
+const UploadPembayaran = ({ navigation, route }) => {
+    const { userId, transaksiId } = route.params;
+
     const [productName, setProductName] = useState(null);
     const [pembayaran, setPembayaran] = useState(null);
     const [productImage, setProductImage] = useState(null);
@@ -23,7 +24,7 @@ const UploadPembayaran = () => {
             setIsLoading(true)
             try {
                 const informasiPenyewaanRef = collection(firestore, 'informasi_penyewaan');
-                const queryPenyewaan = query(informasiPenyewaanRef, where('id_transaksi', '==', transactionID));
+        
                 const snapshotInformasiPenyewaan = await getDocs(queryPenyewaan);
 
                 const peralatan = snapshotInformasiPenyewaan.docs[0].data().peralatan;
@@ -89,7 +90,7 @@ const UploadPembayaran = () => {
         try {
             const downloadURL = uploadedImage;
             if (downloadURL) {         
-                const q = query(collection(firestore, "informasi_penyewaan"), where("id_transaksi", "==", transactionID));
+        
                 const querySnapshot = await getDocs(q);
 
                 var docID = querySnapshot.docs[0].id;
@@ -116,8 +117,7 @@ const UploadPembayaran = () => {
             <View style={{ padding: 10, flexDirection: 'row', borderRadius: 10, backgroundColor: 'white' }}>
                 <Image source={{ uri: productImage }} style={{ width: width * 0.3, height: width * 0.3, borderRadius: 10, }} />
                 <View style={{ padding: 5, flex: 1, paddingLeft: 20 }}>
-                    <Text style={{color: '#004268'}}>{productName}</Text>
-                    <Text style={{color: '#919398'}}>{pembayaran === true ? 'Pembayaran Berhasil' : 'Pembayaran Gagal'}</Text>
+                    <Text style={{ color:'#004268', fontWeight:'bold', fontSize:21 }}>{productName}</Text>
                 </View>
             </View>
             <Text style={{marginTop: 20, color: '#004268', marginBottom: 20}}>Bukti Pembayaran</Text>

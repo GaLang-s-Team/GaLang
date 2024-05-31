@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firestore } from '../config/firebase'
 
-const Navbar = ({ route }) => {
+const NavDash = ({ route }) => {
     const { userId } = route.params;
     const [dataUsers, setDataUsers] = useState([])
     const [isLoading, setIsLoading] = useState(false);
@@ -22,16 +22,16 @@ const Navbar = ({ route }) => {
 
     const navigation = useNavigation();
     const handleToHome = () => {
-        navigation.navigate('Home', {userId: userId});
+      navigation.navigate('Dashboard', {userId: userId});
     }
     const handleToTrans = () => {
-        navigation.navigate('TransaksiPenyewa', {userId: userId});
+      navigation.navigate('TransaksiReview', {userId: userId});
     }
-    const handleToTas = () => {
-        navigation.navigate('Home', {userId: userId});
+    const handleToRiwayat = () => {
+      navigation.navigate('Dashboard', {userId: userId});
     }
     const handleToProfile = () => {
-        navigation.navigate('Profil', {userId: userId});
+      navigation.navigate('Profil', {userId: userId});
     }
 
     return (
@@ -44,9 +44,9 @@ const Navbar = ({ route }) => {
                 <Ionicons name="swap-horizontal-outline" size={24} color="gray" />
                 <Text style={styles.menuText}>Transaksi</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={handleToTas}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleToRiwayat}>
                 <Ionicons name="basket-outline" size={24} color="gray" />
-                <Text style={styles.menuText}>Garasi</Text>
+                <Text style={styles.menuText}>Riwayat</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={handleToProfile}>
                 <Ionicons name="person-outline" size={24} color="gray" />
@@ -79,4 +79,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Navbar;
+export default NavDash;

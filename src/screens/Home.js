@@ -78,7 +78,7 @@ const Home = ({ navigation, route }) => {
     }
 
     const renderItem = ({ item }) => (
-        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('PeralatanDetail', { peralatanId: item.id_peralatan })}>
+        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('PeralatanDetail', { userId: userId, peralatanId: item.id_peralatan })}>
         <Image source={{ uri: item.foto.split(',')[0] }} style={styles.image} />
         <View>
             <Text style={styles.title} numberOfLines={1} ellipsizeMode='tail'>{item.nama}</Text>

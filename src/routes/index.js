@@ -9,11 +9,15 @@ import Signin from '../screens/Signin';
 import PeralatanDetail from '../screens/PeralatanDetail';
 import PeralatanInsert from '../screens/PeralatanInsert';
 import Home from '../screens/Home';
+import Dashboard from '../screens/Dashboard';
 import StatusPenyewaan from '../screens/StatusPenyewaan';
 import Profil from '../screens/Profil';
 import UpdateProfile from '../screens/UpdateProfile';
 import UploadPembayaran from '../screens/UploadPembayaran';
 import Search from '../screens/Search';
+import TransaksiReview from '../screens/TransaksiReview';
+import PembayaranReview from '../screens/PembayaranReview';
+import TransaksiPenyewa from '../screens/TransaksiPenyewa';
 
 const Stack = createStackNavigator()
 
@@ -27,12 +31,16 @@ const Routes = () => {
             <Stack.Screen name= 'Signin' component ={Signin} options={{ headerShown:false }}/>
             <Stack.Screen name='Signup' component={Signup} options={{ headerShown:false }}/>
             <Stack.Screen name= 'Home' component ={Home} options={{ headerShown:false }}/>
+            <Stack.Screen name='Dashboard' component={Dashboard} options={{ headerShown:false }}/>
             <Stack.Screen name='PeralatanDetail' component={PeralatanDetail} options={{ headerShown:false }}/>
             <Stack.Screen name='PeralatanInsert' component={PeralatanInsert} options={{ headerShown:false }}/>
             <Stack.Screen name='Search' component={Search} options={{ headerShown:false }}/>
             <Stack.Screen name= 'StatusPenyewaan' component ={StatusPenyewaan} options={{ headerShown:false }}/>
             <Stack.Screen name= 'Profil' component ={Profil} options={{ headerShown:false }}/>
             <Stack.Screen name= 'UpdateProfile' component ={UpdateProfile} options={{ headerShown:false }}/>
+            <Stack.Screen name= 'TransaksiReview' component ={TransaksiReview} options={{ headerShown:false }}/>
+            <Stack.Screen name= 'PembayaranReview' component ={PembayaranReview} options={{ headerShown:false }}/>            
+            <Stack.Screen name= 'TransaksiPenyewa' component ={TransaksiPenyewa} options={{ headerShown:false }}/>            
             <Stack.Screen name= 'UploadPembayaran' component={UploadPembayaran} options={{ headerShown:false }}/>
 
         </Stack.Navigator>

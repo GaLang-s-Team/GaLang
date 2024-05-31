@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "GaLang",
-    "slug": "GaLang",
+    "slug": "galang",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -29,12 +29,16 @@
     },
     "extra": {
       "eas": {
-        "projectId": "8cdaa497-7433-44c0-87ed-7d295bbb5e78"
+        "projectId": "f7e7df83-602c-4634-87e4-5d4314feea38"
+      },
+      "router": {
+        "origin": false
       }
     },
     "plugins": [
       "expo-router",
       "expo-secure-store"
-    ]
+    ],
+    "owner": "wildhanhidayatullah"
   }
 }

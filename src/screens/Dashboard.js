@@ -11,6 +11,7 @@ import { useIsFocused } from '@react-navigation/native';
 import Navbar from '../component/Navbar';
 import { destroyKey, getKey } from '../config/localStorage'
 import { firebaseAuth, firestore } from '../config/firebase'
+import NavDash from '../component/NavDash';
 
 export default function Dashboard({ navigation, route }) {
     const { userId, role } = route.params;
@@ -156,7 +157,7 @@ export default function Dashboard({ navigation, route }) {
             onPress={() => navigation.navigate('PeralatanInsert', { userId: userId })}>
             <Ionicons name='add' size={24} color='#FFFFFF' />
           </TouchableOpacity>
-          <Navbar route={route}/>
+          <NavDash route={route}/>
       </View>
     );
   };

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, FlatList, Modal, TouchableWithoutFeedback, Pressable } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import Swiper from 'react-native-swiper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 
 import { firestore } from '../config/firebase';
+import { set } from 'firebase/database';
 
 
 export default function PeralatanDetail({ navigation, route }) {
@@ -24,6 +26,10 @@ export default function PeralatanDetail({ navigation, route }) {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(null);
   const [sizes, setSizes] = useState([]);
+  const [takingDate, setTakingDate] = useState(new Date());
+  const [duration, setDuration] = useState(1);
+
+  const [showDate, setShowDate] = useState(false);
   const [isBuyModalVisible, setBuyModalVisible] = useState(false);
   
   const similarPeralatans = [
@@ -45,6 +51,7 @@ export default function PeralatanDetail({ navigation, route }) {
             setPeralatanRating(formatRating(documentSnapshot.data().rating));
             setPeralatanDisewa(documentSnapshot.data().disewa);
             setPeralatanDeskripsi(documentSnapshot.data().deskripsi)
+            setSizes(documentSnapshot.data().ukuran.split(','));
             setPenyedia(documentSnapshot.data().penyedia);
           });
         } else {
@@ -74,7 +81,38 @@ export default function PeralatanDetail({ navigation, route }) {
     setBuyModalVisible(!isBuyModalVisible);
   };
 
-  const handleAddToCart = () => {
+  const handleAjukanSewa = async () => {
+    if (!selectedSize) {
+      Alert.alert('Error', 'Silahkan pilih ukuran peralatan');
+      return;
+    }
+
+    const informasiPenyewaan = {
+      id_transaksi: '',
+      peralatan: String(peralatanId),
+      jumlah: quantity,
+      ukuran: selectedSize,
+      total_harga: peralatanHarga * quantity * duration,
+      pengambilan: String(takingDate),
+      pengembalian: String(addDate(takingDate, duration)),
+      status: 'Menunggu Konfirmasi',
+      pembatalan: false,
+      pembayaran: false,
+      bukti_pembayaran: '',
+      penyedia: penyedia,
+      penyewa: String(userId),
+      rating: 0,
+    };
+
+    try {
+      await addDoc(collection(firestore, 'informasi_penyewaan'), informasiPenyewaan);
+      Alert.alert('Berhasil mengajukan sewa');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to add peralatan: ' + error.message);
+    }
+  }
+  
+  const handleAddtoGarasi = () => {
     Alert.alert('Success', 'Peralatan added to cart!');
   };
 
@@ -89,6 +127,22 @@ export default function PeralatanDetail({ navigation, route }) {
   function formatRating(num) {
     if (num != 0) return `★${num}`;
     else return `Belum Diulas`;
+  }
+
+  const showDatepicker = () => {
+    setShowDate(true);
+  };
+
+  const addDate = (date, days) => {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShowDate(false);
+    setTakingDate(currentDate);
   }
 
   return (
@@ -153,8 +207,8 @@ export default function PeralatanDetail({ navigation, route }) {
         </View>
       </ScrollView>
       <View style={styles.footerButtons}>
-        <TouchableOpacity style={styles.footerButtonLeft} onPress={handleAddToCart}>
-          <Text style={styles.footerButtonTextLeft}>+ Tas</Text>
+        <TouchableOpacity style={styles.footerButtonLeft} onPress={handleAddtoGarasi}>
+          <Text style={styles.footerButtonTextLeft}>+ Garasi</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.footerButtonRight} onPress={toggleBuyModal}>
           <Text style={styles.footerButtonTextRight}>Sewa</Text>
@@ -173,7 +227,7 @@ export default function PeralatanDetail({ navigation, route }) {
                 style={[styles.sizeOption, selectedSize === size && styles.selectedSizeOption]}
                 onPress={() => setSelectedSize(size)}
               >
-                <Text style={styles.sizeOptionText}>{size}</Text>
+                <Text style={[styles.sizeOptionText, selectedSize === size && styles.selectedText]}>{size}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -192,8 +246,41 @@ export default function PeralatanDetail({ navigation, route }) {
               <Ionicons name='add' size={24} color='#004268' />
             </TouchableOpacity>
           </View>
-          <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10}} onPress={() => Alert.alert('Purchase', 'Proceed to payment!')}>
-            <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Sewa</Text>
+          <Text style={styles.modalTitle}>Pilih Tanggal Pengambilan</Text>
+          <View style={{ width:150, height: 30, borderWidth: 1, alignItems: 'center', justifyContent: 'center', borderColor: '#004268', borderRadius: 5 }}>
+            <TouchableOpacity onPress={showDatepicker}>
+              <Text style={styles.sizeOptionText}>{takingDate.toDateString()}</Text>
+            </TouchableOpacity>
+          </View>
+          {showDate === true && (
+            <>
+            <DateTimePicker
+              testID='dateTimePicker'
+              value={takingDate}
+              mode='date'
+              display='default'
+              onChange={onChange}
+            />
+            </>
+          )}
+          <Text style={styles.modalTitle}>Masukkan Lama Penyewaan (Hari)</Text>
+          <View style={styles.quantityContainer}>
+            <TouchableOpacity style={styles.quantityButton} onPress={() => handleQuantityChange(-1)}>
+              <Ionicons name='remove' size={24} color='#004268' />
+            </TouchableOpacity>
+            <TextInput
+              style={styles.quantityInput}
+              value={String(duration)}
+              keyboardType='numeric'
+              onChangeText={(text) => setDuration(Number(text))}
+            />
+            <TouchableOpacity style={styles.quantityButton} onPress={() => handleQuantityChange(1)}>
+              <Ionicons name='add' size={24} color='#004268' />
+            </TouchableOpacity>
+          </View>
+          <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10}}
+            onPress={handleAjukanSewa}>
+            <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Ajukan Sewa</Text>
           </Pressable>
         </View>
       </Modal>
@@ -378,14 +465,15 @@ const styles = StyleSheet.create({
     right: 0,
   },
   modalTitle: {
+    color: '#004268',
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   sizeOptions: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    marginBottom: 10,
   },
   sizeOption: {
     width:50,
@@ -397,11 +485,15 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   selectedSizeOption: {
-    backgroundColor: 'lightgray',
+    backgroundColor: '#459708',
+    borderColor: '#459708',
   },
   sizeOptionText: {
     color: '#004268',
     fontSize: 16,
+  },
+  selectedText: {
+    color: 'white',
   },
   quantityContainer: {
     flexDirection: 'row',
