@@ -1,5 +1,5 @@
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useLayoutEffect, useState, useEffect } from 'react'
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore'
 import { firestore, storage } from '../config/firebase'
 import { Toast } from 'react-native-toast-notifications'
@@ -11,6 +11,8 @@ import Input from '../component/Input';
 import Button from '../component/Button';
 import { Snackbar } from 'react-native-paper';
 import {Picker} from '@react-native-picker/picker';
+import Dropdown from '../component/Dropdown'; 
+import axios from 'axios';
 
 const UpdateProfile = ({ route, navigation }) => {
 
@@ -20,6 +22,56 @@ const UpdateProfile = ({ route, navigation }) => {
 
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  // PROVINCE AND CITY
+  const [provinces, setProvinces] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [nameProvinsi, setNameProvinsi] = useState("");
+  const [nameKota, setNameKota] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+
+  // API KEY 
+  const apiKey = "9d1691566520a90a4eef2081606b9259e6f502c7f6af486be42f0396e22fda9b";
+
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const response = await axios.get('https://api.binderbyte.com/wilayah/provinsi', {
+          params: {
+            api_key: apiKey
+          }
+        });
+        console.log("Provinces response:", response.data); // Tambahkan log respons
+        setProvinces(response.data.value); // Sesuaikan dengan struktur data dari BinderByte API
+      } catch (error) {
+        console.error("Error fetching provinces: ", error.response ? error.response.data : error.message);
+      }
+    };
+
+    fetchProvinces();
+  }, [apiKey]);
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      if (selectedProvince) {
+        try {
+          const response = await axios.get('https://api.binderbyte.com/wilayah/kabupaten', {
+            params: {
+              api_key: apiKey,
+              id_provinsi: selectedProvince,
+            }
+          });
+          console.log("Cities response:", response.data); // Tambahkan log respons
+          setCities(response.data.value); // Sesuaikan dengan struktur data dari BinderByte API
+        } catch (error) {
+          console.error("Error fetching cities: ", error.response ? error.response.data : error.message);
+        }
+      }
+    };
+
+    fetchCities();
+  }, [selectedProvince, apiKey]);
 
   const [inputs, setInputs] = useState({
     fullname: {
@@ -31,6 +83,11 @@ const UpdateProfile = ({ route, navigation }) => {
     nomorTelp: {
       value: '', isValid: true
     },
+    provinsi: {
+      value:'', isValid: true
+    }, kota: {
+      value:'', isValid: true
+    }
   });
 
   const [isLoading, setIsLoading] = useState(false)
@@ -65,6 +122,8 @@ const UpdateProfile = ({ route, navigation }) => {
         fullname: inputs.fullname.value ? inputs.fullname.value : route.params.fullname,
         gender: inputs.gender.value,
         nomorTelp: inputs.nomorTelp.value ? inputs.nomorTelp.value : route.params.nomorTelp,
+        provinsi: inputs.provinsi.value ? inputs.provinsi.value : route.params.provinsi,
+        kota: inputs.kota.value ? inputs.kota.value : route.params.kota,
       };
 
       setIsLoading(true)
@@ -133,6 +192,8 @@ const UpdateProfile = ({ route, navigation }) => {
               imageUri: downloadURL,
               gender: inputs.gender.value,
               nomorTelp: inputs.nomorTelp.value ? inputs.nomorTelp.value : route.params.nomorTelp,
+              provinsi: inputs.provinsi.value ? inputs.provinsi.value : route.params.provinsi,
+              kota: inputs.kota.value ? inputs.kota.value : route.params.kota,
             };
 
             await updateDoc(colRef, dataUpdateWithImage);
@@ -146,6 +207,8 @@ const UpdateProfile = ({ route, navigation }) => {
       }
     }
   }
+  console.log(nameKota);
+  console.log(nameProvinsi);
 
   const navigateToProfile = () => {
     navigation.replace('Profil',{ userId: userId });
@@ -193,7 +256,6 @@ const UpdateProfile = ({ route, navigation }) => {
           <Text style={{ fontSize: 18, marginBottom: 4, color: '#004268', fontWeight: 'bold' }}>Pilih Jenis Kelamin</Text>
           <View style={{ backgroundColor: '#E4E7C9', paddingHorizontal: 15, borderRadius: 10, color: '#E4E7C9', borderColor: '#459708', borderWidth: 1 }}>
             <Picker
-                style={{ color: '#E4E7C9' }}
                 selectedValue={inputs.gender.value !== undefined ? inputs.gender.value : "default"}
                 onValueChange={(itemValue, itemIndex) =>
                 setInputs((prevState) => ({
@@ -202,15 +264,62 @@ const UpdateProfile = ({ route, navigation }) => {
                 }))
                 }>
                 {/* Display default option if gender data is undefined */}
-                <Picker.Item label="Pilih jenis kelamin" value="default" />
+                <Picker.Item label="Pilih jenis kelamin" value="" />
                 {/* Display other gender options */}
                 <Picker.Item label="Laki-laki" value={true} />
                 <Picker.Item label="Perempuan" value={false} />
             </Picker>
             </View>
         </View>
-      </ScrollView>
-      <View style={{ flex: 1, alignItems: 'center', marginTop: '20%', width: '100%' }}>
+        <View style={{ justifyContent: 'center', marginLeft: 20, marginRight: 20 }}>
+            <Text style={{ fontSize: 18, marginBottom: 4, color: '#004268', fontWeight: 'bold' }}>Pilih Provinsi</Text>
+            <View style={{ backgroundColor: '#E4E7C9', paddingHorizontal: 15, borderRadius: 10, color: '#E4E7C9', borderColor: '#459708', borderWidth: 1 }}>
+                <Picker
+                    selectedValue={selectedProvince}
+                    onValueChange={(itemValue) => {
+                      setSelectedProvince(itemValue);
+                      setNameProvinsi(provinces.find(prov => prov.id === itemValue)?.name); // Set nilai nameProvinsi
+                      setInputs((prevState) => ({
+                        ...prevState,
+                        provinsi: { value: (provinces.find(prov => prov.id === itemValue)?.name), isValid: true }
+                      }));
+                      setSelectedCity(""); // Reset city when province changes
+                    }}
+                >
+                    <Picker.Item label="Pilih Provinsi" value="" style={{paddingLeft: 20}}/>
+                    {provinces.map(province => (
+                    <Picker.Item key={province.id} label={province.name} value={province.id} />
+                    ))}
+                </Picker>
+            </View>
+        </View>
+
+        <View style={{ justifyContent: 'center', marginLeft: 20, marginRight: 20, marginTop: 10 }}>
+            <Text style={{ fontSize: 18, marginBottom: 4, color: '#004268', fontWeight: 'bold' }}>Pilih Kota/Kabupaten </Text>
+            <View style={{ backgroundColor: '#E4E7C9', paddingHorizontal: 15, borderRadius: 10, color: '#E4E7C9', borderColor: '#459708', borderWidth: 1 }}>
+                <Picker
+                    selectedValue={selectedCity}
+                    onValueChange={(itemValue) => {
+                      setSelectedCity(itemValue);
+                      setNameKota(cities.find(city => city.id === itemValue)?.name); // Set nilai nameKota
+                      setInputs((prevState) => ({
+                        ...prevState,
+                        kota: { value: (cities.find(city => city.id === itemValue)?.name), isValid: true }
+                      }));
+                    }}
+                    enabled={selectedProvince !== ""}
+                >
+
+                    <Picker.Item label="Pilih Kota" value="" />
+                    {cities.map(city => (
+                    <Picker.Item key={city.id} label={city.name} value={city.id} />
+                    ))}
+                </Picker>
+            </View>
+        </View>
+        {/* <Dropdown/> */}
+        {/* Data Province and City */}
+        <View style={{ flex: 1, alignItems: 'center', width: '100%' }}>
         <TouchableOpacity style={{
           justifyContent: 'center',
           height: 60,
@@ -227,13 +336,14 @@ const UpdateProfile = ({ route, navigation }) => {
           ) : (<Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>Update profile</Text>)}
         </TouchableOpacity>
       </View>
+      </ScrollView>
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
         duration={2000}
-        style={{ marginBottom: "2%", backgroundColor: '#ff0e0e', justifyContent: 'center', borderRadius: 29, marginBottom: '3%' }}
+        style={{ marginBottom: "2%", backgroundColor: '#BDE6AC', justifyContent: 'center', borderRadius: 29, marginBottom: '3%' }}
       >
-        <Text style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>
+        <Text style={{ textAlign: 'center', color: '#004268', fontWeight: 'bold' }}>
           {snackbarMessage}
         </Text>
       </Snackbar>
