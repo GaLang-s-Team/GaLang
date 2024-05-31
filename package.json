@@ -12,12 +12,13 @@
     "@expo-google-fonts/outfit": "^0.2.3",
     "@expo/vector-icons": "^14.0.0",
     "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-community/datetimepicker": "8.0.1",
     "@react-native-picker/picker": "2.7.5",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/stack": "^6.3.29",
     "axios": "^1.7.2",
-    "expo": "^51.0.8",
+    "expo": "~51.0.9",
     "expo-checkbox": "^3.0.0",
     "expo-image": "~1.12.9",
     "expo-image-manipulator": "^12.0.5",
@@ -36,9 +37,7 @@
     "react-native-paper": "^5.12.3",
     "react-native-picker-select": "^9.1.3",
     "react-native-swiper": "^1.6.0",
-    "react-native-toast-notifications": "^3.4.0",
-    "react-native-web": "~0.19.6",
-    "@react-native-community/datetimepicker": "8.0.1"
+    "react-native-toast-notifications": "^3.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

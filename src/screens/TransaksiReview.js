@@ -13,6 +13,7 @@ import Navbar from '../component/Navbar';
 import { FlatList } from 'react-native-gesture-handler';
 import { set } from 'firebase/database';
 import NavDash from '../component/NavDash';
+import { setLogLevel } from 'firebase/app';
 
 export default function TransaksiReview({ navigation, route }) {
   const { userId } = route.params;
@@ -25,8 +26,10 @@ export default function TransaksiReview({ navigation, route }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true)
     fetchPermintaan();
     fetchAktif();
+    setLoading(false)
   }, []);
 
   const fetchPermintaan = async () => {
@@ -74,6 +77,7 @@ export default function TransaksiReview({ navigation, route }) {
   };
 
   const handleTerima = async (transaksiId) => {
+    setLoading(true)
     const docRef = query(collection(firestore, 'informasi_penyewaan'), where('id_transaksi', '==', transaksiId));
     const docId = (await getDocs(docRef)).docs[0].id;
 
@@ -88,10 +92,12 @@ export default function TransaksiReview({ navigation, route }) {
       console.error('Error updating status: ', error);
     } finally {
       fetchPermintaan();
+      setLoading(false)
     }
   }
 
   const handleTolak = async (transaksiId) => {
+    setLoading(true)
     const docRef = query(collection(firestore, 'informasi_penyewaan'), where('id_transaksi', '==', transaksiId));
     const docId = (await getDocs(docRef)).docs[0].id;
 
@@ -106,6 +112,7 @@ export default function TransaksiReview({ navigation, route }) {
       console.error('Error updating status: ', error);
     } finally {
       fetchPermintaan();
+      setLoading(false)
     }
   }
 
@@ -116,8 +123,7 @@ export default function TransaksiReview({ navigation, route }) {
   const renderPermintaan = ({ peralatan, transaksi }) => {
     const image = peralatan.find(item => item.id_peralatan === transaksi.peralatan).foto.split(',')[0];
     const name = peralatan.find(item => item.id_peralatan === transaksi.peralatan).nama;
-    
-    return (
+      return (
       <View style={styles.card}>
         <Image source={{ uri:image }} style={styles.image} />
         <View style={styles.itemTextContainer}>
@@ -137,6 +143,7 @@ export default function TransaksiReview({ navigation, route }) {
         </TouchableOpacity>
       </View>
     );
+    
   };
 
   const renderAktif = ({ peralatan, transaksi }) => {
@@ -160,6 +167,12 @@ export default function TransaksiReview({ navigation, route }) {
       </View>
     );
   };
+
+  if (loading) {
+    return(
+      <></>
+    )
+  }
 
   return (
     <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>

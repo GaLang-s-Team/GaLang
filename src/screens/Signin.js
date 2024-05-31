@@ -160,26 +160,6 @@ const Signin = () => {
                             onChangeText={inputChangeHandler.bind(this, 'password')}
                         />
                     </View>
-                    <View style={{ width: 297, height: 51, borderWidth: 1, borderRadius: 8, marginHorizontal: 'auto', marginTop: 10, paddingHorizontal: 15, borderColor: '#C2C2C2', flexDirection: 'row', alignItems: 'center', }}>
-                    <Ionicons name="people-outline" size={24} color="gray" />
-                    <View style={{ flex: 1, alignItems: 'flex-end', }}>
-                        <RNPickerSelect
-                            onValueChange={(value) => inputChangeHandler('role', value)}
-                            items={[
-                                { label: 'Penyewa', value: 'Penyewa' },
-                                { label: 'Penyedia', value: 'Penyedia' },
-                            ]}
-                            placeholder={{ label: 'Select Role', value: null }}
-                            style={{
-                                ...pickerSelectStyles,
-                                placeholder: {
-                                    color: 'gray',
-                                    fontSize: 15,
-                                },
-                            }}
-                        />
-                    </View>
-                </View>
                 <View style={{ marginVertical: 1,flexDirection: 'row', alignItems: 'center', marginTop: 15, marginHorizontal: 20, }}>
                     {/* Check box */}
                     <Checkbox value={isChecked} onValueChange={setChecked} style={{ marginRight:10 }} color={isChecked ? '#459708' : undefined}/>

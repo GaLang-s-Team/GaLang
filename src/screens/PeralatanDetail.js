@@ -86,9 +86,15 @@ export default function PeralatanDetail({ navigation, route }) {
       Alert.alert('Error', 'Silahkan pilih ukuran peralatan');
       return;
     }
+    
+    const getNumber = async () => {
+    const q = collection(firestore, 'informasi_penyewaan');
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.size;
+  };
 
     const informasiPenyewaan = {
-      id_transaksi: '',
+      id_transaksi: String(getNumber()),
       peralatan: String(peralatanId),
       jumlah: quantity,
       ukuran: selectedSize,
@@ -106,6 +112,8 @@ export default function PeralatanDetail({ navigation, route }) {
 
     try {
       await addDoc(collection(firestore, 'informasi_penyewaan'), informasiPenyewaan);
+
+
       Alert.alert('Berhasil mengajukan sewa');
     } catch (error) {
       Alert.alert('Error', 'Failed to add peralatan: ' + error.message);

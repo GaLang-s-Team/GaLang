@@ -25,7 +25,7 @@ const UploadPembayaran = ({ navigation, route }) => {
             try {
                 const informasiPenyewaanRef = collection(firestore, 'informasi_penyewaan');
         
-                const snapshotInformasiPenyewaan = await getDocs(queryPenyewaan);
+                const snapshotInformasiPenyewaan = await getDocs(informasiPenyewaanRef);
 
                 const peralatan = snapshotInformasiPenyewaan.docs[0].data().peralatan;
                 const peralatanRef = collection(firestore, "peralatan");
@@ -90,7 +90,7 @@ const UploadPembayaran = ({ navigation, route }) => {
         try {
             const downloadURL = uploadedImage;
             if (downloadURL) {         
-        
+                const q = query(collection(firestore, "informasi_penyewaan"), where("id_transaksi", "==", transaksiId));
                 const querySnapshot = await getDocs(q);
 
                 var docID = querySnapshot.docs[0].id;
