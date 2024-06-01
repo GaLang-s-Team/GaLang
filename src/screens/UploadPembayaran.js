@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Dimensions, Image, TouchableOpacity } from 'react-native';
 import { launchImageLibraryAsync } from 'expo-image-picker';
-import { firebaseAuth, firestore, storage } from '../config/firebase';
+import { firestore, storage } from '../config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
-import { update } from 'firebase/database';
 import TopbarBack from '../component/TopbarBack';
 
 const { width } = Dimensions.get('window');
@@ -25,12 +24,12 @@ const UploadPembayaran = ({ navigation, route }) => {
             setIsLoading(true)
             try {
                 const informasiPenyewaanRef = collection(firestore, 'informasi_penyewaan');
-        
-                const snapshotInformasiPenyewaan = await getDocs(informasiPenyewaanRef);
+                const queryInformasiPenyewaan = query(informasiPenyewaanRef, where("id_transaksi", "==", transaksiId));
+                const snapshotInformasiPenyewaan = await getDocs(queryInformasiPenyewaan);
 
                 const peralatan = snapshotInformasiPenyewaan.docs[0].data().peralatan;
                 const peralatanRef = collection(firestore, "peralatan");
-                const queryPeralatan = query(peralatanRef, where('id_peralatan', '==', peralatan));
+                const queryPeralatan = query(peralatanRef, where("id_peralatan", "==", peralatan));
                 const snapshotPeralatan = await getDocs(queryPeralatan);
                 
                 const productName = snapshotPeralatan.docs[0].data().nama;
@@ -113,32 +112,41 @@ const UploadPembayaran = ({ navigation, route }) => {
     }
 
     return (
-        <View style={{ padding: 20, position: 'relative', height: '100%' }}>
+        <View style={{position: 'relative', height: '100%'}}>
             <TopbarBack navigation={navigation} title='Pembayaran' />
-            <Text style={{ color: '#004268', marginBottom: 10 }}>Produk</Text>
-            <View style={{ padding: 10, flexDirection: 'row', borderRadius: 10, backgroundColor: 'white' }}>
-                <Image source={{ uri: productImage }} style={{ width: width * 0.3, height: width * 0.3, borderRadius: 10, }} />
-                <View style={{ padding: 5, flex: 1, paddingLeft: 20 }}>
-                    <Text style={{ color:'#004268', fontWeight:'bold', fontSize:21 }}>{productName}</Text>
+            <View style={{ padding: 20, position: 'relative', height: '100%' }}>
+            
+                <Text style={{ color: '#004268', marginBottom: 10 }}>Produk</Text>
+                <View style={{ padding: 10, flexDirection: 'row', borderRadius: 10, backgroundColor: 'white' }}>
+                    <Image source={{ uri: productImage }} style={{ width: width * 0.3, height: width * 0.3, borderRadius: 10, }} />
+                    <View style={{ padding: 5, flex: 1, paddingLeft: 20 }}>
+                        <Text style={{ color:'#004268', fontWeight:'bold', fontSize:21 }}>{productName}</Text>
+                    </View>
                 </View>
+                <Text style={{marginTop: 20, color: '#004268', marginBottom: 20}}>Bukti Pembayaran</Text>
+                {uploadedImage && (
+                    <Image source={{ uri: uploadedImage }} style={{ width: '100%', height: 200, borderRadius: 10 }} />
+                )}
+                
             </View>
-            <Text style={{marginTop: 20, color: '#004268', marginBottom: 20}}>Bukti Pembayaran</Text>
-            {uploadedImage && (
-                <Image source={{ uri: uploadedImage }} style={{ width: '100%', height: 200, borderRadius: 10 }} />
-            )}
-            <View style={{position: 'absolute', bottom: 20, width: '100%', left: 20}}>
-                <TouchableOpacity onPress={handleUploadBukti} style={{ marginTop: 20, padding: 5, borderRadius: 10, backgroundColor: '#459708', width: '50%', marginLeft: 'auto', marginRight: 'auto', marginTop: 20, paddingVertical: 10 }}>
-                    <Text style={{ color: 'white', textAlign: 'center' }}>Upload Bukti</Text>
-                </TouchableOpacity>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                    <Text style={{color: '#9B9B9B'}}>Total Tagihan:</Text>
-                    <Text>{'Rp'+orderAmount}</Text>
+            {uploadedImage === ""? 
+                <View style={{position: 'absolute', bottom: 20, width: '100%', paddingLeft: 20, paddingRight: 20}}>
+                    <TouchableOpacity onPress={handleUploadBukti} style={{ marginTop: 20, padding: 5, borderRadius: 10, backgroundColor: '#459708', width: '50%', marginLeft: 'auto', marginRight: 'auto', marginTop: 20, paddingVertical: 10 }}>
+                        <Text style={{ color: 'white', textAlign: 'center' }}>Upload Bukti</Text>
+                    </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                        <Text style={{color: '#9B9B9B'}}>Total Tagihan:</Text>
+                        <Text>{'Rp'+orderAmount}</Text>
+                    </View>
+                    <TouchableOpacity onPress={handleUploadPembayaran} style={{ width: '100%', padding: 5, borderRadius: 10, backgroundColor: '#459708', marginLeft: 'auto', marginRight: 'auto', marginTop: 20, paddingVertical: 10 }}>
+                        <Text style={{ color: 'white', textAlign: 'center' }}>Upload Pembayaran</Text>
+                    </TouchableOpacity>
                 </View>
-                <TouchableOpacity onPress={handleUploadPembayaran} style={{ width: '100%', padding: 5, borderRadius: 10, backgroundColor: '#459708', marginLeft: 'auto', marginRight: 'auto', marginTop: 20, paddingVertical: 10 }}>
-                    <Text style={{ color: 'white', textAlign: 'center' }}>Upload Pembayaran</Text>
-                </TouchableOpacity>
-            </View>
+                :
+                <></>
+            }
         </View>
+        
     );
 };
 

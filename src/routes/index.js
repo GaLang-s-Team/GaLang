@@ -10,7 +10,7 @@ import PeralatanDetail from '../screens/PeralatanDetail';
 import PeralatanInsert from '../screens/PeralatanInsert';
 import Home from '../screens/Home';
 import Dashboard from '../screens/Dashboard';
-import StatusPenyewaan from '../screens/StatusPenyewaan';
+import StatusPenyewaan from '../screens/TransaksiPenyewaan';
 import Profil from '../screens/Profil';
 import UpdateProfile from '../screens/UpdateProfile';
 import UploadPembayaran from '../screens/UploadPembayaran';
@@ -21,6 +21,7 @@ import TransaksiPenyewa from '../screens/TransaksiPenyewa';
 import ProfilDash from '../screens/ProfilDash';
 import UpdateProfileDash from '../screens/UpdateProfilDash';
 import Tas from '../screens/Tas';
+import TransaksiPenyewaan from '../screens/TransaksiPenyewaan';
 
 const Stack = createStackNavigator()
 
@@ -48,6 +49,7 @@ const Routes = () => {
             <Stack.Screen name= 'TransaksiPenyewa' component ={TransaksiPenyewa} options={{ headerShown:false }}/>            
             <Stack.Screen name= 'UploadPembayaran' component={UploadPembayaran} options={{ headerShown:false }}/>
             <Stack.Screen name= 'Tas' component={Tas} options={{ headerShown:false }}/>
+            <Stack.Screen name= 'TransaksiPenyewaan' component={TransaksiPenyewaan} options={{ headerShown:false }}/>
 
         </Stack.Navigator>
       </NavigationContainer>

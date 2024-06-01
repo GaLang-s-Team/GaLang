@@ -10,8 +10,6 @@ const Navbar = ({ route }) => {
     const [dataUsers, setDataUsers] = useState([])
     const [isLoading, setIsLoading] = useState(false);
 
-    console.log('userId', userId);
-
     useEffect(() => {
         setIsLoading(true)
         const docRef = doc(firestore, "users", userId)
@@ -28,7 +26,7 @@ const Navbar = ({ route }) => {
         navigation.navigate('Home', {userId: userId});
     }
     const handleToTrans = () => {
-        navigation.navigate('TransaksiPenyewa', {userId: userId});
+        navigation.navigate('TransaksiPenyewaan', {userId: userId});
     }
     const handleToTas = () => {
         navigation.navigate('Tas', {userId: userId});
