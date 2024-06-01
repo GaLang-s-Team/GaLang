@@ -9,6 +9,8 @@ import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { firestore } from '../config/firebase';
 import { set } from 'firebase/database';
 
+import PopUpSewaSukses from '../component/PopUpSewaSukses';
+
 
 export default function PeralatanDetail({ navigation, route }) {
   const { peralatanId, userId} = route.params;
@@ -37,6 +39,12 @@ export default function PeralatanDetail({ navigation, route }) {
     { id: '1', name: 'Peralatan 1', image: 'https://via.placeholder.com/100', price: '10000' },
     { id: '2', name: 'Peralatan 2', image: 'https://via.placeholder.com/100', price: '15000' },
   ];
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleClose = () => {
+      setModalVisible(false);
+  };
 
   useEffect(() => {
     const fetchPeralatanAndPenyedia = async () => {
@@ -114,7 +122,8 @@ export default function PeralatanDetail({ navigation, route }) {
       await addDoc(collection(firestore, 'informasi_penyewaan'), informasiPenyewaan);
 
 
-      Alert.alert('Berhasil mengajukan sewa');
+      // Alert.alert('Berhasil mengajukan sewa');
+      setModalVisible(true)
     } catch (error) {
       Alert.alert('Error', 'Failed to add peralatan: ' + error.message);
     }
@@ -291,6 +300,22 @@ export default function PeralatanDetail({ navigation, route }) {
             <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Ajukan Sewa</Text>
           </Pressable>
         </View>
+      </Modal>
+      <Modal
+          transparent={true}
+          animationType="slide"
+          visible={modalVisible}
+          onRequestClose={handleClose}
+      >
+          <View style={{backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: 10, width: '100%', height: '100%', marginLeft: 'auto', marginRight: 'auto'}}>
+              {/* <View style={styles.modalContainer}> */}
+              <View style={{backgroundColor: 'white', borderRadius: 20, marginTop: 'auto', marginBottom: 'auto'}}>
+                <PopUpSewaSukses onClose={handleClose} />
+              </View>
+                  
+                  
+              {/* </View> */}
+          </View>
       </Modal>
     </View>
   );

@@ -80,10 +80,10 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
               <Image source={{ uri: item.foto }} style={styles.itemImage} />
               <View style={styles.itemInfo}>
                 <Text style={[styles.itemText, styles.itemTextProductName]}>{item.nama}</Text>
-                <Text style={styles.itemText}>{item.ukuran}</Text>    
-                <Text style={styles.itemText}>{item.jumlah}</Text> 
-                <Text style={styles.itemText}>{item.pengambilan}</Text> 
-                <Text style={styles.itemText}>{item.pengembalian}</Text>            
+                <Text style={styles.itemText}>Ukuran: {item.ukuran}</Text>    
+                <Text style={styles.itemText}>Jumlah: {item.jumlah}</Text> 
+                <Text style={styles.itemText}>Start: {item.pengambilan}</Text> 
+                <Text style={styles.itemText}>End: {item.pengembalian}</Text>            
                 {item.status === "Menunggu Pembayaran"? 
                   <TouchableOpacity style={styles.itemPeriodContainer} onPress={() => navigation.navigate('UploadPembayaran', { userId: userId, transaksiId: item.transaksiId})}>
                     <Text style={[styles.itemPeriod, {backgroundColor: 'blue'}]}>Bayar</Text> 
@@ -121,8 +121,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
     position: 'relative',
     height: height,
-    borderWidth: 1,
-    borderColor: 'black'
+    paddingBottom: 60,
   },
   navbar: {
     flexDirection: 'row',
