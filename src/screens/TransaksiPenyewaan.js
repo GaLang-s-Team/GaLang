@@ -58,22 +58,29 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
     filteredData = data.filter(item => item.status === "Ditolak" || item.status === "Selesai" || item.status === "Aktif");
   }
 
+  const sortedFilteredData = filteredData.sort((a, b) => {
+    const dateA = new Date(a.pengambilan);
+    const dateB = new Date(b.pengambilan);
+    return dateA - dateB;
+  });
+
   return (
     <View style={styles.container}>
       <TopbarBack navigation={navigation} title='Transaksi'></TopbarBack>
       <View style={styles.navbar}>
-        <TouchableOpacity style={[styles.menuItem, styles.menuItemLeft, selectedMenu === 'Selesai' && styles.activeMenuItem]} onPress={() => setSelectedMenu('Selesai')}>
-          <Text style={[styles.menuText, selectedMenu === 'Selesai' && styles.activeMenuText]}>Selesai</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={[styles.menuItem, styles.menuItemRight, selectedMenu === 'Menunggu' && styles.activeMenuItem]} onPress={() => setSelectedMenu('Menunggu')}>
           <Text style={[styles.menuText, selectedMenu === 'Menunggu' && styles.activeMenuText]}>Menunggu</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={[styles.menuItem, styles.menuItemLeft, selectedMenu === 'Selesai' && styles.activeMenuItem]} onPress={() => setSelectedMenu('Selesai')}>
+          <Text style={[styles.menuText, selectedMenu === 'Selesai' && styles.activeMenuText]}>Selesai</Text>
+        </TouchableOpacity>
+        
       </View>
       {loading ? (
         <></>
       ) : (
         <FlatList
-          data={filteredData}
+          data={sortedFilteredData}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <View style={styles.item}>
@@ -138,12 +145,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff'
   },
   menuItemLeft: {
-    borderTopLeftRadius: 20,
-    borderBottomLeftRadius: 20
-  },
-  menuItemRight: {
     borderTopRightRadius: 20,
     borderBottomRightRadius: 20,
+  },
+  menuItemRight: {
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20
   },
   activeMenuItem: {
     backgroundColor: '#459708',
