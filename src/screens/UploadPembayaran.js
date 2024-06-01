@@ -114,7 +114,7 @@ const UploadPembayaran = ({ navigation, route }) => {
 
     return (
         <View style={{ padding: 20, position: 'relative', height: '100%' }}>
-            <TopbarBack navigation={navigation} title='Keranjang' />
+            <TopbarBack navigation={navigation} title='Pembayaran' />
             <Text style={{ color: '#004268', marginBottom: 10 }}>Produk</Text>
             <View style={{ padding: 10, flexDirection: 'row', borderRadius: 10, backgroundColor: 'white' }}>
                 <Image source={{ uri: productImage }} style={{ width: width * 0.3, height: width * 0.3, borderRadius: 10, }} />
