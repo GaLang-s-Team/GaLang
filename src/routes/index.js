@@ -18,6 +18,8 @@ import Search from '../screens/Search';
 import TransaksiReview from '../screens/TransaksiReview';
 import PembayaranReview from '../screens/PembayaranReview';
 import TransaksiPenyewa from '../screens/TransaksiPenyewa';
+import ProfilDash from '../screens/ProfilDash';
+import UpdateProfileDash from '../screens/UpdateProfilDash';
 
 const Stack = createStackNavigator()
 
@@ -37,7 +39,9 @@ const Routes = () => {
             <Stack.Screen name='Search' component={Search} options={{ headerShown:false }}/>
             <Stack.Screen name= 'StatusPenyewaan' component ={StatusPenyewaan} options={{ headerShown:false }}/>
             <Stack.Screen name= 'Profil' component ={Profil} options={{ headerShown:false }}/>
+            <Stack.Screen name= 'ProfilDash' component ={ProfilDash} options={{ headerShown:false }}/>
             <Stack.Screen name= 'UpdateProfile' component ={UpdateProfile} options={{ headerShown:false }}/>
+            <Stack.Screen name= 'UpdateProfileDash' component ={UpdateProfileDash} options={{ headerShown:false }}/>
             <Stack.Screen name= 'TransaksiReview' component ={TransaksiReview} options={{ headerShown:false }}/>
             <Stack.Screen name= 'PembayaranReview' component ={PembayaranReview} options={{ headerShown:false }}/>            
             <Stack.Screen name= 'TransaksiPenyewa' component ={TransaksiPenyewa} options={{ headerShown:false }}/>            

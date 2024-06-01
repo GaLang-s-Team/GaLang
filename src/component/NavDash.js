@@ -31,7 +31,7 @@ const NavDash = ({ route }) => {
       navigation.navigate('Dashboard', {userId: userId});
     }
     const handleToProfile = () => {
-      navigation.navigate('Profil', {userId: userId});
+      navigation.navigate('ProfilDash', {userId: userId});
     }
 
     return (

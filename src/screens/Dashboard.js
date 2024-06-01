@@ -14,7 +14,7 @@ import { firebaseAuth, firestore } from '../config/firebase'
 import NavDash from '../component/NavDash';
 
 export default function Dashboard({ navigation, route }) {
-    const { userId, role } = route.params;
+    const { userId} = route.params;
 
     const [dataUsers, setDataUsers] = useState({});
     const [peralatan, setPeralatan] = useState([]);

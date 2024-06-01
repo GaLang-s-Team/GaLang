@@ -13,7 +13,7 @@ import { useIsFocused } from '@react-navigation/native';
 import Navbar from '../component/Navbar';
 
 const Home = ({ navigation, route }) => {
-    const { userId } = route.params;
+    const { userId} = route.params;
     const [dataUsers, setDataUsers] = useState({});
     const [peralatan, setPeralatan] = useState([]);
     const [imageUrls, setImageUrls] = useState({});
