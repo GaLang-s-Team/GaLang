@@ -20,6 +20,7 @@ import PembayaranReview from '../screens/PembayaranReview';
 import TransaksiPenyewa from '../screens/TransaksiPenyewa';
 import ProfilDash from '../screens/ProfilDash';
 import UpdateProfileDash from '../screens/UpdateProfilDash';
+import Tas from '../screens/Tas';
 
 const Stack = createStackNavigator()
 
@@ -46,6 +47,7 @@ const Routes = () => {
             <Stack.Screen name= 'PembayaranReview' component ={PembayaranReview} options={{ headerShown:false }}/>            
             <Stack.Screen name= 'TransaksiPenyewa' component ={TransaksiPenyewa} options={{ headerShown:false }}/>            
             <Stack.Screen name= 'UploadPembayaran' component={UploadPembayaran} options={{ headerShown:false }}/>
+            <Stack.Screen name= 'Tas' component={Tas} options={{ headerShown:false }}/>
 
         </Stack.Navigator>
       </NavigationContainer>

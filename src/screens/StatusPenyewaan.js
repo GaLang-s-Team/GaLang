@@ -5,10 +5,12 @@ import Navbar from '../component/Navbar';
 
 const { width } = Dimensions.get('window');
 
-const StatusPenyewaan = () => {
+const StatusPenyewaan = ({ navigation, route }) => {
   const [selectedMenu, setSelectedMenu] = useState('berhasil');
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  
 
   useEffect(() => {
     const fetchData = async () => {
