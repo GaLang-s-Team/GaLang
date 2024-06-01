@@ -5,6 +5,7 @@ import { firebaseAuth, firestore, storage } from '../config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { update } from 'firebase/database';
+import TopbarBack from '../component/TopbarBack';
 
 const { width } = Dimensions.get('window');
 
@@ -113,6 +114,7 @@ const UploadPembayaran = ({ navigation, route }) => {
 
     return (
         <View style={{ padding: 20, position: 'relative', height: '100%' }}>
+            <TopbarBack navigation={navigation} title='Keranjang' />
             <Text style={{ color: '#004268', marginBottom: 10 }}>Produk</Text>
             <View style={{ padding: 10, flexDirection: 'row', borderRadius: 10, backgroundColor: 'white' }}>
                 <Image source={{ uri: productImage }} style={{ width: width * 0.3, height: width * 0.3, borderRadius: 10, }} />
