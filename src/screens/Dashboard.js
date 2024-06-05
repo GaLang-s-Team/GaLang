@@ -146,7 +146,7 @@ export default function Dashboard({ navigation, route }) {
 
     return (
       <View style={{ flex:1 }}>
-          <Topback nama={dataUsers.fullname} userId={userId} />
+          <Topback nama={dataUsers.fullname} route={route} />
           { reviewTagihan ? (
             <Text style={{ marginHorizontal:'auto', marginLeft:20, marginTop:15, fontWeight:'bold',color:'#004268', fontSize:16 }}>Tagihan: Rp{tagihan} (Pembayaran sedang diperiksa)</Text>
           ) : (
