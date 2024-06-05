@@ -16,7 +16,6 @@ export default function PembayaranReview ({ navigation, route }) {
     const [pembayaran, setPembayaran] = useState(null);
     const [productImage, setProductImage] = useState(null);
     const [orderAmount, setOrderAmount] = useState(null);
-    const [deliveryAmount, setDeliveryAmount] = useState(null);
     const [uploadedImage, setUploadedImage] = useState(null);
     const [isLoading, setIsLoading] = useState(null);
 
@@ -79,7 +78,7 @@ export default function PembayaranReview ({ navigation, route }) {
     };
 
     const handleTolakPembayaran = async () => {
-
+        
     }
 
     const handleTerimaPengembalian = async () => {

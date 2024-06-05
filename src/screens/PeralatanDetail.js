@@ -4,7 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import Swiper from 'react-native-swiper';
 import { LinearGradient } from 'expo-linear-gradient';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, doc, addDoc, query, where, getDocs, updateDoc } from 'firebase/firestore';
 
 import { firestore } from '../config/firebase';
 import { set } from 'firebase/database';
@@ -33,6 +33,7 @@ export default function PeralatanDetail({ navigation, route }) {
 
   const [showDate, setShowDate] = useState(false);
   const [isBuyModalVisible, setBuyModalVisible] = useState(false);
+  const [garasiVisible, setGarasiVisible] = useState(false);
   
   const similarPeralatans = [
     // Data peralatan serupa
@@ -43,7 +44,8 @@ export default function PeralatanDetail({ navigation, route }) {
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleClose = () => {
-      setModalVisible(false);
+    setGarasiVisible(false);
+    setModalVisible(false);
   };
 
   useEffect(() => {
@@ -55,9 +57,9 @@ export default function PeralatanDetail({ navigation, route }) {
           peralatanDoc.forEach(documentSnapshot => {
             setPeralatanImages(documentSnapshot.data().foto.split(','));
             setPeralatanNama(documentSnapshot.data().nama);
-            setPeralatanHarga(formatHarga(documentSnapshot.data().harga));
-            setPeralatanRating(formatRating(documentSnapshot.data().rating));
-            setPeralatanDisewa(documentSnapshot.data().disewa);
+            setPeralatanHarga(documentSnapshot.data().harga);
+            setPeralatanRating(documentSnapshot.data().rating);
+            setPeralatanDisewa(documentSnapshot.data().jumlah_sewa);
             setPeralatanDeskripsi(documentSnapshot.data().deskripsi)
             setSizes(documentSnapshot.data().ukuran.split(','));
             setPenyedia(documentSnapshot.data().penyedia);
@@ -94,21 +96,35 @@ export default function PeralatanDetail({ navigation, route }) {
       Alert.alert('Error', 'Silahkan pilih ukuran peralatan');
       return;
     }
+
+    const getAvailableQuantity = async () => {
+      const q = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', peralatanId));
+      const querySnapshot = await getDocs(q);
+      
+      return Number(querySnapshot.docs[0].data().ketersediaan);
+    };
+
+    const qty = await getAvailableQuantity();
+    if (quantity > qty) {
+      Alert.alert('Error', 'Jumlah yang diminta melebihi ketersediaan peralatan.');
+      return;
+    }
     
     const getNumber = async () => {
-    const q = collection(firestore, 'informasi_penyewaan');
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.size;
-  };
+      const q = collection(firestore, 'informasi_penyewaan');
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.size + 1;
+    };
 
+    const number = await getNumber();
     const informasiPenyewaan = {
-      id_transaksi: String(getNumber()),
+      id_transaksi: String('transaksi-' + number),
       peralatan: String(peralatanId),
       jumlah: quantity,
       ukuran: selectedSize,
       total_harga: peralatanHarga * quantity * duration,
-      pengambilan: String(takingDate),
-      pengembalian: String(addDate(takingDate, duration)),
+      pengambilan: takingDate.toString().substring(0, 15),
+      pengembalian: addDate(takingDate, duration).toString().substring(0, 15),
       status: 'Menunggu Konfirmasi',
       pembatalan: false,
       pembayaran: false,
@@ -119,18 +135,46 @@ export default function PeralatanDetail({ navigation, route }) {
     };
 
     try {
+      const q = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', peralatanId));
+      const querySnapshot = await getDocs(q);
+      
+      const docId = querySnapshot.docs[0].id;
+      await updateDoc(doc(firestore, 'peralatan', docId), {
+        jumlah_sewa: querySnapshot.docs[0].data().jumlah_sewa + 1,
+        ketersediaan: querySnapshot.docs[0].data().ketersediaan - quantity,
+      });
+
       await addDoc(collection(firestore, 'informasi_penyewaan'), informasiPenyewaan);
 
-
-      // Alert.alert('Berhasil mengajukan sewa');
       setModalVisible(true)
     } catch (error) {
       Alert.alert('Error', 'Failed to add peralatan: ' + error.message);
     }
   }
   
-  const handleAddtoGarasi = () => {
-    Alert.alert('Success', 'Peralatan added to cart!');
+  const handleAddtoGarasi = async () => {
+    try {
+      const q = query(collection(firestore, 'keranjang'), where('userId', '==', userId));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        const keranjangData = {
+          userId: userId,
+          id_peralatan: peralatanId,
+        };
+        await addDoc(collection(firestore, 'keranjang'), keranjangData);
+      } else {
+        const docId = querySnapshot.docs[0].id;
+        const peralatan = String(querySnapshot.docs[0].data().id_peralatan + ',' + peralatanId);
+        const keranjangData = {
+          id_peralatan: peralatan,
+        };
+        await updateDoc(doc(firestore, 'keranjang', docId), keranjangData);
+      }
+      setGarasiVisible(true)
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
   };
 
   const handleQuantityChange = (change) => {
@@ -188,8 +232,8 @@ export default function PeralatanDetail({ navigation, route }) {
         </View>
         <View style={styles.peralatanDetails}>
           <Text style={styles.peralatanName}>{peralatanNama}</Text>
-          <Text style={styles.peralatanPrice}>Rp{peralatanHarga}</Text>
-          <Text style={styles.peralatanHighlight}>Rating: {peralatanRating}</Text>
+          <Text style={styles.peralatanPrice}>Rp{formatHarga(peralatanHarga)}</Text>
+          <Text style={styles.peralatanHighlight}>Rating: {formatRating(peralatanRating)}</Text>
           <Text style={styles.peralatanHighlight}>Disewa: {peralatanDisewa}</Text>
         </View>
         <View style={styles.storeProfile}>
@@ -299,6 +343,24 @@ export default function PeralatanDetail({ navigation, route }) {
             onPress={handleAjukanSewa}>
             <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Ajukan Sewa</Text>
           </Pressable>
+        </View>
+      </Modal>
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={garasiVisible}
+        onRequestClose={handleClose}
+      >
+        <View style={{backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: 10, width: '100%', height: '100%', marginLeft: 'auto', marginRight: 'auto'}}>
+          <View style={{backgroundColor: 'white', borderRadius: 20, marginTop: 'auto', marginBottom: 'auto'}}>
+          <View style={{padding: 20}}>
+            <Image source={require('../../assets/GaLang.png')} style={{width: 133, height: 189, marginLeft: 'auto', marginRight: 'auto'}}></Image>
+            <Image source={require('../../assets/TulisanGaLang.png')} style={{width: 117, height: 27, marginLeft: 'auto', marginRight: 'auto'}}></Image>
+            <Text style={{color: '#459708', marginLeft: 'auto', marginRight: 'auto', marginTop: 20, fontWeight: 'bold', fontSize: 16}}>Peralatan telah ditambahkan</Text>
+            <Text style={{color: '#004268', marginLeft: 'auto', marginRight: 'auto', marginTop: 10, fontWeight: 'bold', fontSize: 14}}>Silahkan periksa garasi Anda</Text>
+            <Pressable onPress={handleClose} style={{marginTop: 20, backgroundColor: '#459708', padding: 15, borderRadius: 10}}><Text style={{textAlign: 'center', color: 'white', fontWeight: 'bold'}}>OK</Text></Pressable>
+          </View>
+          </View>
         </View>
       </Modal>
       <Modal

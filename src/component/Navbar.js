@@ -28,8 +28,8 @@ const Navbar = ({ route }) => {
     const handleToTrans = () => {
         navigation.navigate('TransaksiPenyewaan', {userId: userId});
     }
-    const handleToTas = () => {
-        navigation.navigate('Tas', {userId: userId});
+    const handleToGarasi = () => {
+        navigation.navigate('Garasi', {userId: userId});
     }
     const handleToProfile = () => {
         navigation.navigate('Profil', {userId: userId});
@@ -45,9 +45,9 @@ const Navbar = ({ route }) => {
                 <Ionicons name="swap-horizontal-outline" size={24} color="gray" />
                 <Text style={styles.menuText}>Transaksi</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={handleToTas}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleToGarasi}>
                 <Ionicons name="basket-outline" size={24} color="gray" />
-                <Text style={styles.menuText}>Keranjang</Text>
+                <Text style={styles.menuText}>Grasi</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={handleToProfile}>
                 <Ionicons name="person-outline" size={24} color="gray" />

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions, Image } from 'react-native';
 import Navbar from '../component/Navbar';
-import { collection, getDocs, query, where, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { firestore } from '../config/firebase';
 import TopbarBack from '../component/TopbarBack';
 
 const { width } = Dimensions.get('window');
 
-const Tas = ({ navigation, route }) => {
+const Garasi = ({ navigation, route }) => {
     const { userId } = route.params;
     const [peralatan, setPeralatan] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -24,25 +24,28 @@ const Tas = ({ navigation, route }) => {
             // Iterate through the snapshot and create the JSON object
             for (const doc of snapshotKeranjang.docs) {
                 const data = doc.data();
-                const id_peralatan = data.id_peralatan;
-                const peralatanData = {
-                    id_peralatan: id_peralatan,
-                    nama: '',
-                    foto: ''
-                };
+                const id_peralatan = data.id_peralatan.split(',');
 
-                // Fetch additional data for each item
-                const peralatanRef = collection(firestore, 'peralatan');
-                const queryPeralatan = query(peralatanRef, where('id_peralatan', '==', id_peralatan));
-                const snapshotPeralatan = await getDocs(queryPeralatan);
+                for (let i = 0; i < id_peralatan.length; i++) {
+                    const peralatanData = {
+                        id_peralatan: id_peralatan[i],
+                        nama: '',
+                        foto: ''
+                    };
 
-                if (!snapshotPeralatan.empty) {
-                    const peralatanDoc = snapshotPeralatan.docs[0].data();
-                    peralatanData.nama = peralatanDoc.nama || '';
-                    peralatanData.foto = peralatanDoc.foto || '';
+                    // Fetch additional data for each item
+                    const peralatanRef = collection(firestore, 'peralatan');
+                    const queryPeralatan = query(peralatanRef, where('id_peralatan', '==', id_peralatan[i]));
+                    const snapshotPeralatan = await getDocs(queryPeralatan);
+
+                    if (!snapshotPeralatan.empty) {
+                        const peralatanDoc = snapshotPeralatan.docs[0].data();
+                        peralatanData.nama = peralatanDoc.nama || '';
+                        peralatanData.foto = peralatanDoc.foto || '';
+                    }
+
+                    peralatanArray.push(peralatanData);
                 }
-
-                peralatanArray.push(peralatanData);
             }
 
             // Update the state with the fetched data
@@ -60,14 +63,23 @@ const Tas = ({ navigation, route }) => {
         try {
             // Assuming each item in 'keranjang' collection has a unique id
             const keranjangRef = collection(firestore, 'keranjang');
-            const queryKeranjang = query(keranjangRef, where('userId', '==', userId), where('id_peralatan', '==', id_peralatan));
+            const queryKeranjang = query(keranjangRef, where('userId', '==', userId));
             const snapshotKeranjang = await getDocs(queryKeranjang);
 
             if (!snapshotKeranjang.empty) {
                 // Delete each document that matches the query
-                snapshotKeranjang.forEach(async (docSnapshot) => {
-                    await deleteDoc(doc(firestore, 'keranjang', docSnapshot.id));
-                });
+                if (snapshotKeranjang.docs[0].data().id_peralatan.includes(',')) {
+                    var arrPeralatan = snapshotKeranjang.docs[0].data().id_peralatan.split(',');
+                    var index = arrPeralatan.indexOf(id_peralatan);
+                    if (index > -1) {
+                        arrPeralatan.splice(index, 1);
+                    }
+                    await updateDoc(doc(firestore, 'keranjang', snapshotKeranjang.docs[0].id), {
+                        id_peralatan: arrPeralatan.join(',')
+                    });
+                } else {
+                    await deleteDoc(doc(firestore, 'keranjang', snapshotKeranjang.docs[0].id));
+                }
                 // Refresh the data
                 fetchData();
             }
@@ -170,4 +182,4 @@ const styles = StyleSheet.create({
     // Add other styles here
 });
 
-export default Tas;
+export default Garasi;

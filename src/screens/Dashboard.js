@@ -12,17 +12,19 @@ import Navbar from '../component/Navbar';
 import { destroyKey, getKey } from '../config/localStorage'
 import { firebaseAuth, firestore } from '../config/firebase'
 import NavDash from '../component/NavDash';
+import { set } from 'firebase/database';
 
 export default function Dashboard({ navigation, route }) {
-    const { userId} = route.params;
+    const { userId } = route.params;
 
     const [dataUsers, setDataUsers] = useState({});
     const [peralatan, setPeralatan] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [activeIndex, setActiveIndex] = useState(0);
 
     const [tagihan, setTagihan] = useState(0);
+    const [reviewTagihan, setReviewTagihan] = useState(false);
     const [rating, setRating] = useState('');
+    const [lokasi, setLokasi] = useState('');
     
     const isFocused = useIsFocused();
 
@@ -49,7 +51,9 @@ export default function Dashboard({ navigation, route }) {
             if (penyediaDoc) {
               penyediaDoc.forEach(documentSnapshot => {
                 setTagihan(formatHarga(documentSnapshot.data().tagihan));
+                setReviewTagihan(documentSnapshot.data().review_tagihan);
                 setRating(documentSnapshot.data().rating);
+                setLokasi(documentSnapshot.data().kota);
               });
             } else {
               console.log('No such penyedia!');
@@ -64,7 +68,7 @@ export default function Dashboard({ navigation, route }) {
         // const interval = setInterval(() => {
         //     fetchPeralatanAndPenyedia()
         // }, 5000);
-    }, [userId]);
+    }, [isFocused, userId]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -73,7 +77,7 @@ export default function Dashboard({ navigation, route }) {
     }, [isFocused, userId]);
 
     const renderItem = ({ item }) => (
-        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('PeralatanDetail', { peralatanId: item.id_peralatan })}>
+        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('PeralatanEdit', { userId: userId, peralatanId: item.id_peralatan })}>
             <Image source={{ uri: item.foto.split(',')[0] }} style={styles.image} />
             <View>
                 <Text style={styles.title} numberOfLines={1} ellipsizeMode='tail'>{item.nama}</Text>
@@ -81,7 +85,7 @@ export default function Dashboard({ navigation, route }) {
                 <Text style={styles.rating}>{formatRating(item.rating)}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name='location-outline' size={20} color='#004268' style={{ marginLeft:9, marginBottom:5 }}/>
-                    <Text style={styles.location}>Bandung</Text>
+                    <Text style={styles.location}>{lokasi}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -132,10 +136,14 @@ export default function Dashboard({ navigation, route }) {
     return (
       <View style={{ flex:1 }}>
           <Topback nama={dataUsers.fullname} userId={userId} />
-          <Text style={{ marginHorizontal:'auto', marginLeft:20, marginTop:15, fontWeight:'bold',color:'#004268', fontSize:16 }}>Tagihan: Rp{tagihan}</Text>
+          { reviewTagihan ? (
+            <Text style={{ marginHorizontal:'auto', marginLeft:20, marginTop:15, fontWeight:'bold',color:'#004268', fontSize:16 }}>Tagihan: Rp{tagihan} (Pembayaran sedang diperiksa)</Text>
+          ) : (
+            <Text style={{ marginHorizontal:'auto', marginLeft:20, marginTop:15, fontWeight:'bold',color:'#004268', fontSize:16 }}>Tagihan: Rp{tagihan}</Text>
+          )}
           <Text style={{ marginHorizontal:'auto', marginLeft:20, fontWeight:'bold',color:'#004268', fontSize:16 }}>Rating: ★{rating}</Text>
-          <View style={{ flexDirection:'row', justifyContent:'space-between', marginVertical:5, marginHorizontal:20 }}>
-            <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10, width:'47.5%'}} onPress={() => Alert.alert('Purchase', 'Proceed to payment!')}>
+          <View style={{ flexDirection:'row', justifyContent:'space-between', marginBottom:5, marginHorizontal:20, marginTop:15 }}>
+            <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10, width:'47.5%'}} onPress={() => navigation.navigate('PembayaranTagihan', {userId: userId})}>
               <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Bayar Tagihan</Text>
             </Pressable>
             <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10, width:'47.5%'}} onPress={handleBooster}>

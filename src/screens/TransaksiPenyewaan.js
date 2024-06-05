@@ -86,11 +86,13 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
             <View style={styles.item}>
               <Image source={{ uri: item.foto }} style={styles.itemImage} />
               <View style={styles.itemInfo}>
-                <Text style={[styles.itemText, styles.itemTextProductName]}>{item.nama}</Text>
-                <Text style={styles.itemText}>Ukuran: {item.ukuran}</Text>    
-                <Text style={styles.itemText}>Jumlah: {item.jumlah}</Text> 
-                <Text style={styles.itemText}>Start: {item.pengambilan}</Text> 
-                <Text style={styles.itemText}>End: {item.pengembalian}</Text>            
+                <View>
+                  <Text style={[styles.itemText, styles.itemTextProductName]}>{item.nama}</Text>
+                  <Text style={styles.itemText}>Ukuran: {item.ukuran}</Text>    
+                  <Text style={styles.itemText}>Jumlah: {item.jumlah}</Text> 
+                  <Text style={styles.itemText}>Pengambilan: {item.pengambilan}</Text> 
+                  <Text style={styles.itemText}>pengembalian: {item.pengembalian}</Text>
+                </View>
                 {item.status === "Menunggu Pembayaran"? 
                   <TouchableOpacity style={styles.itemPeriodContainer} onPress={() => navigation.navigate('UploadPembayaran', { userId: userId, transaksiId: item.transaksiId})}>
                     <Text style={[styles.itemPeriod, {backgroundColor: 'blue'}]}>Bayar</Text> 
@@ -125,7 +127,6 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ddd',
     position: 'relative',
     height: height,
     paddingBottom: 60,
@@ -134,23 +135,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: width,
-    backgroundColor: '#ddd',
     padding: 10,
   },
   menuItem: {
     flex: 1,
     alignItems: 'center',
-    height: '100%',
+    justifyContent: 'center',
+    height: 50,
     paddingVertical: 5,
     backgroundColor: '#fff'
   },
   menuItemLeft: {
-    borderTopRightRadius: 20,
-    borderBottomRightRadius: 20,
+    borderTopRightRadius: 25,
+    borderBottomRightRadius: 25,
   },
   menuItemRight: {
-    borderTopLeftRadius: 20,
-    borderBottomLeftRadius: 20
+    borderTopLeftRadius: 25,
+    borderBottomLeftRadius: 25,
   },
   activeMenuItem: {
     backgroundColor: '#459708',
@@ -166,19 +167,29 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: 'row',
     padding: 10,
-    margin: 10,
+    marginHorizontal: 15,
+    marginVertical: 5,
     borderRadius: 10,
     backgroundColor: '#fff',
   },
   itemImage: {
-    width: '30%',
-    height: '100%',
+    width: 100,
+    height: 100,
     marginRight: 10,
     borderRadius: 5,
   },
   itemInfo: {
     flex: 1,
-    justifyContent: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   itemText: {
     fontSize: 12,
@@ -189,7 +200,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   itemPeriodContainer: {
-    paddingTop: 30,
+    marginTop: 65,
     alignItems: 'flex-end',
   },
   itemPeriod: {
@@ -200,7 +211,7 @@ const styles = StyleSheet.create({
     padding: 5,
     paddingHorizontal: 18,
     borderRadius: 7,
-    width: '70%',
+    width: 115,
   },
 });
 

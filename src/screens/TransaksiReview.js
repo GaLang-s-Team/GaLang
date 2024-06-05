@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useLayoutEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Alert, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Modal, Pressable } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { collection, doc, addDoc, query, where, getDoc, getDocs, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useIsFocused } from '@react-navigation/native';
 
 import TopbarBack from '../component/TopbarBack';
 import { firestore, storage } from '../config/firebase';
-import Navbar from '../component/Navbar';
 import { FlatList } from 'react-native-gesture-handler';
-import { set } from 'firebase/database';
 import NavDash from '../component/NavDash';
 import { setLogLevel } from 'firebase/app';
 
@@ -23,58 +21,82 @@ export default function TransaksiReview({ navigation, route }) {
   const [peralatanAktif, setPeralatanAktif] = useState([]);
 
   const [mode, setMode] = useState('permintaan');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     setLoading(true)
+
+    const fetchPermintaan = async () => {
+      const permintaanRef = query(collection(firestore, 'informasi_penyewaan'), where('penyedia', '==', userId), where('status', '==', 'Menunggu Konfirmasi'));
+      const permintaanDoc = await getDocs(permintaanRef);
+      if (permintaanDoc) {
+        const permintaan = permintaanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let daftarPeralatan =[];
+
+        for (let i = 0; i < permintaan.length; i++) {
+          const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', permintaan[i].peralatan));
+          const peralatanDoc = await getDocs(peralatanRef);
+          if (peralatanDoc) {
+            const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            daftarPeralatan.push(peralatan[0]);
+          }
+        }
+        
+        setPeralatanPermintaan(daftarPeralatan);
+        setTransaksiPermintaan(permintaan);
+      } else {
+        console.log('No such permintaan!');
+      }
+    };
+  
+    const fetchAktif = async () => {
+      const aktifRef = query(collection(firestore, 'informasi_penyewaan'), where('penyedia', '==', userId), where('status', '==', 'Aktif'));
+      const waitRef = query(collection(firestore, 'informasi_penyewaan'), where('penyedia', '==', userId), where('status', '==', 'Menunggu Pembayaran'));
+      const [aktifDoc, waitDoc] = await Promise.all([getDocs(aktifRef), getDocs(waitRef)]);
+
+      if (aktifDoc || waitDoc) {
+        let daftarPeralatan =[];
+
+        const aktif = aktifDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        for (let i = 0; i < aktif.length; i++) {
+          const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', aktif[i].peralatan));
+          const peralatanDoc = await getDocs(peralatanRef);
+          if (peralatanDoc) {
+            const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            daftarPeralatan.push(peralatan[0]);
+          }
+        }
+
+        const wait = waitDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        for (let i = 0; i < wait.length; i++) {
+          const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', wait[i].peralatan));
+          const peralatanDoc = await getDocs(peralatanRef);
+          if (peralatanDoc) {
+            const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            daftarPeralatan.push(peralatan[0]);
+          }
+        }
+        
+        let transaksi = [...aktif, ...wait];
+        setPeralatanAktif(daftarPeralatan);
+        setTransaksiAktif(transaksi);
+      } else {
+        console.log('No such permintaan!');
+      }
+    };
+
     fetchPermintaan();
     fetchAktif();
     setLoading(false)
-  }, []);
-
-  const fetchPermintaan = async () => {
-    const permintaanRef = query(collection(firestore, 'informasi_penyewaan'), where('penyedia', '==', userId), where('status', '==', 'Menunggu Konfirmasi'));
-    const permintaanDoc = await getDocs(permintaanRef);
-    if (permintaanDoc) {
-      const permintaan = permintaanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      let daftarPeralatan =[];
-      for (let i = 0; i < permintaan.length; i++) {
-        const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', permintaan[i].peralatan));
-        const peralatanDoc = await getDocs(peralatanRef);
-        if (peralatanDoc) {
-          const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          daftarPeralatan.push(peralatan[0]);
-        }
-      }
-      
-      setPeralatanPermintaan(daftarPeralatan);
-      setTransaksiPermintaan(permintaan);
-    } else {
-      console.log('No such permintaan!');
-    }
-  };
-
-  const fetchAktif = async () => {
-    const aktifRef = query(collection(firestore, 'informasi_penyewaan'), where('penyedia', '==', userId), where('status', '==', 'Aktif'));
-    const aktifDoc = await getDocs(aktifRef);
-    if (aktifDoc) {
-      const aktif = aktifDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      let daftarPeralatan =[];
-      for (let i = 0; i < aktif.length; i++) {
-        const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', aktif[i].peralatan));
-        const peralatanDoc = await getDocs(peralatanRef);
-        if (peralatanDoc) {
-          const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          daftarPeralatan.push(peralatan[0]);
-        }
-      }
-
-      setPeralatanAktif(daftarPeralatan);
-      setTransaksiAktif(aktif);
-    } else {
-      console.log('No such permintaan!');
-    }
-  };
+  }, [isFocused, userId, mode]);
+  
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: null
+    });
+  }, [isFocused, userId, mode]);
 
   const handleTerima = async (transaksiId) => {
     setLoading(true)
@@ -84,14 +106,13 @@ export default function TransaksiReview({ navigation, route }) {
     try {
       const informasiPenyewaanRef = doc(firestore, 'informasi_penyewaan', docId);
       await updateDoc(informasiPenyewaanRef, {
-        status: 'Aktif',
+        status: 'Menunggu Pembayaran',
       });
 
       console.log('Status updated successfully');
     } catch (error) {
       console.error('Error updating status: ', error);
     } finally {
-      fetchPermintaan();
       setLoading(false)
     }
   }
@@ -111,7 +132,6 @@ export default function TransaksiReview({ navigation, route }) {
     } catch (error) {
       console.error('Error updating status: ', error);
     } finally {
-      fetchPermintaan();
       setLoading(false)
     }
   }
@@ -121,9 +141,10 @@ export default function TransaksiReview({ navigation, route }) {
   }
 
   const renderPermintaan = ({ peralatan, transaksi }) => {
-    const image = peralatan.find(item => item.id_peralatan === transaksi.peralatan).foto.split(',')[0];
-    const name = peralatan.find(item => item.id_peralatan === transaksi.peralatan).nama;
-      return (
+    const image = peralatan.find(i => i.id_peralatan === transaksi.peralatan).foto.split(',')[0];
+    const name = peralatan.find(i => i.id_peralatan === transaksi.peralatan).nama;
+    
+    return (
       <View style={styles.card}>
         <Image source={{ uri:image }} style={styles.image} />
         <View style={styles.itemTextContainer}>
@@ -147,8 +168,8 @@ export default function TransaksiReview({ navigation, route }) {
   };
 
   const renderAktif = ({ peralatan, transaksi }) => {
-    const image = peralatan.find(item => item.id_peralatan === transaksi.peralatan).foto.split(',')[0];
-    const name = peralatan.find(item => item.id_peralatan === transaksi.peralatan).nama;
+    const image = peralatan.find(i => i.id_peralatan === transaksi.peralatan).foto.split(',')[0];
+    const name = peralatan.find(i => i.id_peralatan === transaksi.peralatan).nama;
     
     return (
       <View style={styles.card}>
@@ -168,31 +189,26 @@ export default function TransaksiReview({ navigation, route }) {
     );
   };
 
-  if (loading) {
-    return(
-      <></>
-    )
-  }
-
   return (
     <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <TopbarBack navigation={navigation} title={'Transaksi'}/>
-      <View style={{ flexDirection:'row', width:'auto', height:50, marginHorizontal:20, marginBottom:10, backgroundColor:'transparent', borderRadius:25 }}>
-        <Pressable style={{ width:'50%', height:'100%', justifyContent:'center', alignItems:'center', backgroundColor:mode === 'permintaan' ? '#459708' : '#FFFFFF', borderTopLeftRadius:25, borderBottomLeftRadius:25 }} onPress={() => {setMode('permintaan'); fetchPermintaan()}}>
+      <View style={{ flexDirection:'row', width:'auto', height:50, marginHorizontal:15, marginBottom:15, backgroundColor:'transparent', borderRadius:25 }}>
+        <Pressable style={{ width:'50%', height:'100%', justifyContent:'center', alignItems:'center', backgroundColor:mode === 'permintaan' ? '#459708' : '#FFFFFF', borderTopLeftRadius:25, borderBottomLeftRadius:25 }} onPress={() => {setMode('permintaan')}}>
           <Text style={{ color:mode === 'permintaan' ? '#FFFFFF' : '#004268', fontWeight:'bold' }}>Permintaan</Text>
         </Pressable>
-        <Pressable style={{ width:'50%', height:'100%', justifyContent:'center', alignItems:'center', backgroundColor:mode === 'aktif' ? '#459708' : '#FFFFFF', borderTopRightRadius:25, borderBottomRightRadius:25 }} onPress={() => {setMode('aktif'); fetchAktif()}}>
+        <Pressable style={{ width:'50%', height:'100%', justifyContent:'center', alignItems:'center', backgroundColor:mode === 'aktif' ? '#459708' : '#FFFFFF', borderTopRightRadius:25, borderBottomRightRadius:25 }} onPress={() => {setMode('aktif')}}>
           <Text style={{ color:mode === 'aktif' ? '#FFFFFF' : '#004268', fontWeight:'bold' }}>Aktif</Text>
         </Pressable>
       </View>
-      {mode === 'permintaan' ? (
+      { mode === 'permintaan' && !loading && (
         <FlatList
           data={transaksiPermintaan}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => renderPermintaan({ peralatan: peralatanPermintaan, transaksi: item })}
           contentContainerStyle={{paddingHorizontal: 20}}
         />
-      ) : (
+      )}
+      { mode === 'aktif' && !loading && (
         <FlatList
           data={transaksiAktif}
           keyExtractor={(item) => item.id}
