@@ -32,18 +32,24 @@ const Signin = () => {
     const [snackbarMessage, setSnackbarMessage] = useState('');
 
     useEffect(() => {
-        getKey('LOGGED_IN').then(res => {
-            const data = res;
-            console.log(data.role);
-            if (data) {
+    const fetchLoggedInUser = async () => {
+        try {
+            const res = await getKey('LOGGED_IN');
+            if (res) {
+                const data = res; // Already parsed in getKey
+                console.log(data.role);
                 if (data.role === 'Penyewa') {
-                    navigation.replace('Home', { userId: data.userId});
+                    navigation.replace('Home', { userId: data.userId });
                 } else {
-                    navigation.replace('Dashboard', { userId: data.userId});
+                    navigation.replace('Dashboard', { userId: data.userId });
                 }
             }
-        });
-    }, []);
+        } catch (error) {
+            console.error("Error retrieving logged in user data:", error);
+        }
+    };
+    fetchLoggedInUser();
+}, []);
 
     const handleSignUp = () => {
         navigation.navigate('Signup');

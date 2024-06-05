@@ -7,9 +7,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // Jika terjadi kesalahan, sebuah pesan toast "Error store key" akan ditampilkan dengan tipe "danger" dan durasi 2 detik.
 export const storeKey = async (key, value) => {
     try {
-        await AsyncStorage.setItem(key, JSON.stringify(value))
+        const jsonValue = JSON.stringify(value);
+        await AsyncStorage.setItem(key, jsonValue);
     } catch (error) {
-        console.log(error);
+        console.error("Error storing key:", error);
     }
 }
 
@@ -20,14 +21,13 @@ export const storeKey = async (key, value) => {
 // Jika terjadi kesalahan, sebuah pesan toast "Error get key" akan ditampilkan dengan tipe "danger" dan durasi 2 detik.
 export const getKey = async (key) => {
     try {
-        const value = await AsyncStorage.getItem(key)
-        if (value !== null) {
-            return JSON.parse(value)
-        }
+        const jsonValue = await AsyncStorage.getItem(key);
+        return jsonValue != null ? JSON.parse(jsonValue) : null;
     } catch (error) {
-        console.log(error);
+        console.error("Error retrieving key:", error);
+        return null;
     }
-}
+};
 
 // Fungsi yang digunakan untuk menghapus semua data dari penyimpanan lokal.
 // Fungsi ini menggunakan AsyncStorage.clear() untuk menghapus semua data dari penyimpanan lokal.

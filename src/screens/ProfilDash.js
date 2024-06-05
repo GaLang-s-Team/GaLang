@@ -24,10 +24,11 @@ const ProfilDash = ({ navigation, route }) => {
     };
 
     const { userId } = route.params;
+    const id_pengguna = userId;
 
     useEffect(() => {
         setIsLoading(true);
-        const docRef = doc(firestore, "users", userId);
+        const docRef = doc(firestore, "penyedia", id_pengguna);
         getDoc(docRef).then((doc) => {
             setDataUsers(doc.data());
         }).finally(() => {
@@ -56,13 +57,13 @@ const ProfilDash = ({ navigation, route }) => {
 
             <View style={{ marginTop: "27%", alignItems: 'center', zIndex: 1 }}>
                 <Image
-                    source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
+                    source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.nama}` }}
                     style={{ width: 100, height: 100, borderRadius: 50 }}
                 />
                 <View style={{ alignItems: 'center', marginTop: 9 }}>
                     {dataUsers ? (
                         <>
-                            <Text style={{ textAlign: 'center', fontSize: 20, color: '#004268' }}>{dataUsers.fullname}</Text>
+                            <Text style={{ textAlign: 'center', fontSize: 20, color: '#004268' }}>{dataUsers.nama}</Text>
                         </>
                     ) : (
                         <Text style={{ color: '#FFAC33', fontSize: 25, fontWeight: '600' }}>Loading...</Text>
@@ -82,10 +83,10 @@ const ProfilDash = ({ navigation, route }) => {
                     }}
                     onPress={() => navigation.navigate('UpdateProfileDash', {
                         userId: userId,
-                        fullname: dataUsers.fullname,
+                        fullname: dataUsers.nama,
                         imageUri: dataUsers.imageUri,
                         gender: dataUsers.gender,
-                        nomorTelp: dataUsers.nomorTelp,
+                        nomorTelp: dataUsers.telepon,
                         provinsi: dataUsers.provinsi,
                         kota: dataUsers.kota
                     })}
@@ -102,7 +103,7 @@ const ProfilDash = ({ navigation, route }) => {
                                 // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
                                 style={{ width: 39, height: 39, borderRadius: 50 }}
                             />
-                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.fullname}</Text>
+                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.nama}</Text>
                     </View>
                 </View>
                 <View style={{ marginHorizontal: 'auto' }}>
@@ -129,7 +130,7 @@ const ProfilDash = ({ navigation, route }) => {
                                 // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
                                 style={{ width: 39, height: 39, borderRadius: 50 }}
                             />
-                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.nomorTelp}</Text>
+                            <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.telepon}</Text>
                     </View>
                 </View>
                 <View style={{ marginHorizontal: 'auto' }}>

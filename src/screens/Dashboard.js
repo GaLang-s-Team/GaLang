@@ -27,44 +27,63 @@ export default function Dashboard({ navigation, route }) {
     const isFocused = useIsFocused();
 
     useEffect(() => {
-        setIsLoading(true);
-        const docRef = doc(firestore, 'users', userId);
-        getDoc(docRef).then((doc) => {
-            setDataUsers(doc.data());
-        });
+    setIsLoading(true);
+    const fetchUserData = async () => {
+        try {
+            const docRef = doc(firestore, 'users', userId);
+            const docSnap = await getDoc(docRef);
 
-        const fetchPeralatanAndPenyedia = async () => {
-          try {
+            if (docSnap.exists()) {
+                setDataUsers(docSnap.data());
+            } else {
+                console.log('No such user document!');
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
+
+    const fetchPeralatanAndPenyedia = async () => {
+        try {
             const peralatanRef = query(collection(firestore, 'peralatan'), where('penyedia', '==', userId));
             const peralatanDoc = await getDocs(peralatanRef);
-            if (peralatanDoc) {
-              const peralatanInfo = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-              setPeralatan(peralatanInfo);
+            if (!peralatanDoc.empty) {
+                const peralatanInfo = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setPeralatan(peralatanInfo);
             } else {
-              console.log('No such peralatan!');
+                console.log('No such peralatan!');
             }
-    
+
             const penyediaRef = query(collection(firestore, 'penyedia'), where('id_pengguna', '==', userId));
             const penyediaDoc = await getDocs(penyediaRef);
-            if (penyediaDoc) {
-              penyediaDoc.forEach(documentSnapshot => {
-                setTagihan(formatHarga(documentSnapshot.data().tagihan));
-                setRating(documentSnapshot.data().rating);
-              });
+            if (!penyediaDoc.empty) {
+                penyediaDoc.forEach(documentSnapshot => {
+                    const data = documentSnapshot.data();
+                    if (data && data.tagihan != null && data.rating != null) {
+                        setTagihan(formatHarga(data.tagihan));
+                        setRating(data.rating);
+                    } else {
+                        console.log('Tagihan or rating is undefined!');
+                    }
+                });
             } else {
-              console.log('No such penyedia!');
+                console.log('No such penyedia!');
             }
-          } catch (error) {
+        } catch (error) {
             console.error('Error fetching peralatan or penyedia:', error);
-          }
-        };
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-        fetchPeralatanAndPenyedia()
+    fetchUserData();
+    fetchPeralatanAndPenyedia();
+}, [userId]);
 
-        // const interval = setInterval(() => {
+
+    // const interval = setInterval(() => {
         //     fetchPeralatanAndPenyedia()
         // }, 5000);
-    }, [userId]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -130,36 +149,41 @@ export default function Dashboard({ navigation, route }) {
     }
 
     return (
-      <View style={{ flex:1 }}>
-          <Topback nama={dataUsers.fullname} userId={userId} />
-          <Text style={{ marginHorizontal:'auto', marginLeft:20, marginTop:15, fontWeight:'bold',color:'#004268', fontSize:16 }}>Tagihan: Rp{tagihan}</Text>
-          <Text style={{ marginHorizontal:'auto', marginLeft:20, fontWeight:'bold',color:'#004268', fontSize:16 }}>Rating: ★{rating}</Text>
-          <View style={{ flexDirection:'row', justifyContent:'space-between', marginVertical:5, marginHorizontal:20 }}>
-            <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10, width:'47.5%'}} onPress={() => Alert.alert('Purchase', 'Proceed to payment!')}>
-              <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Bayar Tagihan</Text>
+    <View style={{ flex: 1 }}>
+        <Topback nama={dataUsers.fullname} userId={userId} />
+        <Text style={{ marginHorizontal: 'auto', marginLeft: 20, marginTop: 15, fontWeight: 'bold', color: '#004268', fontSize: 16 }}>
+            Tagihan: Rp{tagihan ? tagihan : '0'}
+        </Text>
+        <Text style={{ marginHorizontal: 'auto', marginLeft: 20, fontWeight: 'bold', color: '#004268', fontSize: 16 }}>
+            Rating: ★{rating ? rating : '0'}
+        </Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 5, marginHorizontal: 20 }}>
+            <Pressable style={{ backgroundColor: '#459708', padding: 10, borderRadius: 10, width: '47.5%' }} onPress={() => Alert.alert('Purchase', 'Proceed to payment!')}>
+                <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold', textAlign: 'center' }}>Bayar Tagihan</Text>
             </Pressable>
-            <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10, width:'47.5%'}} onPress={handleBooster}>
-              <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Aktifkan Booster</Text>
+            <Pressable style={{ backgroundColor: '#459708', padding: 10, borderRadius: 10, width: '47.5%' }} onPress={handleBooster}>
+                <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold', textAlign: 'center' }}>Aktifkan Booster</Text>
             </Pressable>
-          </View>
-          <View style={styles.container}>
-              <FlatList
-                  data={peralatan}
-                  renderItem={renderItem}
-                  keyExtractor={(item) => item.id}
-                  style={styles.flatListContainer}
-                  numColumns={2}
-                  columnWrapperStyle={styles.row}
-                  contentContainerStyle={styles.flatListContainer}
-              />
-          </View>
-          <TouchableOpacity style={{position:'absolute', backgroundColor:'#459708', width:35, height:35, bottom:70, right:25, borderRadius:50, justifyContent:'center', alignItems:'center'}}
+        </View>
+        <View style={styles.container}>
+            <FlatList
+                data={peralatan}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                style={styles.flatListContainer}
+                numColumns={2}
+                columnWrapperStyle={styles.row}
+                contentContainerStyle={styles.flatListContainer}
+            />
+        </View>
+        <TouchableOpacity style={{ position: 'absolute', backgroundColor: '#459708', width: 35, height: 35, bottom: 70, right: 25, borderRadius: 50, justifyContent: 'center', alignItems: 'center' }}
             onPress={() => navigation.navigate('PeralatanInsert', { userId: userId })}>
             <Ionicons name='add' size={24} color='#FFFFFF' />
-          </TouchableOpacity>
-          <NavDash route={route}/>
-      </View>
-    );
+        </TouchableOpacity>
+        <NavDash route={route} />
+    </View>
+);
+
   };
   
   const styles = StyleSheet.create({
