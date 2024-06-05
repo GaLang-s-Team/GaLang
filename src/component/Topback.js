@@ -24,6 +24,7 @@ export default function Topback ({nama, userId}) {
             try {
                 const docRef = doc(firestore, 'users', userId);
                 const docSnap = await getDoc(docRef);
+                console.log(docRef);
                 if (docSnap.exists()) {
                     setDataUsers(docSnap.data());
                 }
