@@ -89,7 +89,13 @@ const Signup = () => {
                 kota: "",
                 provinsi: "",
                 telepon: "",
-                alamat: ""
+                alamat: "",
+                rating: 0,
+                review_tagihan: false,
+                status_tagihan: "berjalan",
+                tagihan: 0,
+                bukti_tagihan: "",
+                diskon_tagihan: false
             };
 
             console.log("docRef Created : ", docRef.role);
