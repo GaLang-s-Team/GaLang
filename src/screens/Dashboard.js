@@ -12,6 +12,7 @@ import Navbar from '../component/Navbar';
 import { destroyKey, getKey } from '../config/localStorage'
 import { firebaseAuth, firestore } from '../config/firebase'
 import NavDash from '../component/NavDash';
+import TopbackDash from '../component/TopbackDash';
 
 export default function Dashboard({ navigation, route }) {
     const { userId} = route.params;
@@ -150,7 +151,7 @@ export default function Dashboard({ navigation, route }) {
 
     return (
     <View style={{ flex: 1 }}>
-        <Topback nama={dataUsers.fullname} userId={userId} />
+        <TopbackDash nama={dataUsers.fullname} route={route} />
         <Text style={{ marginHorizontal: 'auto', marginLeft: 20, marginTop: 15, fontWeight: 'bold', color: '#004268', fontSize: 16 }}>
             Tagihan: Rp{tagihan ? tagihan : '0'}
         </Text>

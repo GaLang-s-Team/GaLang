@@ -101,7 +101,7 @@ const Home = ({ navigation, route }) => {
     
     return (
         <View style={{ flex:1 }}>
-            <Topback nama={dataUsers.fullname} userId={userId} />
+            <Topback nama={dataUsers.fullname} route={route} />
             <View style={styles.swiperContainer}>
                 <Swiper 
                     loop 

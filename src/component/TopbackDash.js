@@ -10,21 +10,21 @@ import { useNavigation } from '@react-navigation/native';
 import { firebaseAuth, firestore } from '../config/firebase'
 import { destroyKey, getKey } from '../config/localStorage'
 
-export default function Topback ({nama, route}) {
+export default function TopbackDash ({nama, route}) {
     const navigation = useNavigation();
     const {userId} = route.params;
+    const id_pengguna = userId;
 
     const [dataUsers, setDataUsers] = useState([])
     const [isLoading, setIsLoading] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState('');
-    const id_pengguna = userId;
 
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const docRef = doc(firestore, 'penyewa', id_pengguna);
+                const docRef = doc(firestore, 'penyedia', id_pengguna);
                 const docSnap = await getDoc(docRef);
                 console.log(docRef);
                 if (docSnap.exists()) {
