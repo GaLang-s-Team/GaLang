@@ -12,6 +12,7 @@ import Navbar from '../component/Navbar';
 import { destroyKey, getKey } from '../config/localStorage'
 import { firebaseAuth, firestore } from '../config/firebase'
 import NavDash from '../component/NavDash';
+import TopbackDash from '../component/TopbackDash';
 import { set } from 'firebase/database';
 
 export default function Dashboard({ navigation, route }) {
@@ -29,23 +30,33 @@ export default function Dashboard({ navigation, route }) {
     const isFocused = useIsFocused();
 
     useEffect(() => {
-        setIsLoading(true);
-        const docRef = doc(firestore, 'users', userId);
-        getDoc(docRef).then((doc) => {
-            setDataUsers(doc.data());
-        });
+    setIsLoading(true);
+    const fetchUserData = async () => {
+        try {
+            const docRef = doc(firestore, 'users', userId);
+            const docSnap = await getDoc(docRef);
 
-        const fetchPeralatanAndPenyedia = async () => {
-          try {
+            if (docSnap.exists()) {
+                setDataUsers(docSnap.data());
+            } else {
+                console.log('No such user document!');
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
+
+    const fetchPeralatanAndPenyedia = async () => {
+        try {
             const peralatanRef = query(collection(firestore, 'peralatan'), where('penyedia', '==', userId));
             const peralatanDoc = await getDocs(peralatanRef);
-            if (peralatanDoc) {
-              const peralatanInfo = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-              setPeralatan(peralatanInfo);
+            if (!peralatanDoc.empty) {
+                const peralatanInfo = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setPeralatan(peralatanInfo);
             } else {
-              console.log('No such peralatan!');
+                console.log('No such peralatan!');
             }
-    
+
             const penyediaRef = query(collection(firestore, 'penyedia'), where('id_pengguna', '==', userId));
             const penyediaDoc = await getDocs(penyediaRef);
             if (penyediaDoc) {
@@ -56,19 +67,19 @@ export default function Dashboard({ navigation, route }) {
                 setLokasi(documentSnapshot.data().kota);
               });
             } else {
-              console.log('No such penyedia!');
+                console.log('No such penyedia!');
             }
-          } catch (error) {
+        } catch (error) {
             console.error('Error fetching peralatan or penyedia:', error);
-          }
-        };
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-        fetchPeralatanAndPenyedia()
+    fetchUserData();
+    fetchPeralatanAndPenyedia();
+}, [isFocused, userId]);
 
-        // const interval = setInterval(() => {
-        //     fetchPeralatanAndPenyedia()
-        // }, 5000);
-    }, [isFocused, userId]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -146,28 +157,29 @@ export default function Dashboard({ navigation, route }) {
             <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10, width:'47.5%'}} onPress={() => navigation.navigate('PembayaranTagihan', {userId: userId})}>
               <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Bayar Tagihan</Text>
             </Pressable>
-            <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10, width:'47.5%'}} onPress={handleBooster}>
-              <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Aktifkan Booster</Text>
+            <Pressable style={{ backgroundColor: '#459708', padding: 10, borderRadius: 10, width: '47.5%' }} onPress={handleBooster}>
+                <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold', textAlign: 'center' }}>Aktifkan Booster</Text>
             </Pressable>
-          </View>
-          <View style={styles.container}>
-              <FlatList
-                  data={peralatan}
-                  renderItem={renderItem}
-                  keyExtractor={(item) => item.id}
-                  style={styles.flatListContainer}
-                  numColumns={2}
-                  columnWrapperStyle={styles.row}
-                  contentContainerStyle={styles.flatListContainer}
-              />
-          </View>
-          <TouchableOpacity style={{position:'absolute', backgroundColor:'#459708', width:35, height:35, bottom:70, right:25, borderRadius:50, justifyContent:'center', alignItems:'center'}}
+        </View>
+        <View style={styles.container}>
+            <FlatList
+                data={peralatan}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                style={styles.flatListContainer}
+                numColumns={2}
+                columnWrapperStyle={styles.row}
+                contentContainerStyle={styles.flatListContainer}
+            />
+        </View>
+        <TouchableOpacity style={{ position: 'absolute', backgroundColor: '#459708', width: 35, height: 35, bottom: 70, right: 25, borderRadius: 50, justifyContent: 'center', alignItems: 'center' }}
             onPress={() => navigation.navigate('PeralatanInsert', { userId: userId })}>
             <Ionicons name='add' size={24} color='#FFFFFF' />
-          </TouchableOpacity>
-          <NavDash route={route}/>
-      </View>
-    );
+        </TouchableOpacity>
+        <NavDash route={route} />
+    </View>
+);
+
   };
   
   const styles = StyleSheet.create({

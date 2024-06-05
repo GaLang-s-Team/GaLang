@@ -68,6 +68,7 @@ const Signup = () => {
         try {
             const success = await createUserWithEmailAndPassword(firebaseAuth, dataRegister.email, dataRegister.password);
             const userId = success.user.uid;
+            const id_pengguna = success.user.uid;
             console.log(userId);
 
             await sendEmailVerification(firebaseAuth.currentUser)
@@ -81,11 +82,27 @@ const Signup = () => {
                 role: dataRegister.role,
             };
 
-            console.log("docRef Created : ", docRef);
+            const docRefRole = {
+                id_pengguna: id_pengguna,
+                email: dataRegister.email,
+                nama: dataRegister.fullname,
+                kota: "",
+                provinsi: "",
+                telepon: "",
+                alamat: ""
+            };
 
+            console.log("docRef Created : ", docRef.role);
+
+            // Conditional Witing Berdasarkan Role 
+            // console.log("Penyewaaa",role);
             await setDoc(doc(firestore, "users", userId), docRef);
+            if (docRef.role === 'Penyewa'){
+                await setDoc(doc(firestore, "penyewa", id_pengguna), docRefRole)
+            }else if (docRef.role === 'Penyedia') {
+                await setDoc(doc(firestore, "penyedia", id_pengguna), docRefRole)
+            }
             console.log("Document set in Firestore");
-
             console.log("Register Success");
             setSnackMessage("Register success please login");
             setSnackVisible(true)

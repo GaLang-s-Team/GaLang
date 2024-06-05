@@ -16,7 +16,8 @@ import axios from 'axios';
 
 const UpdateProfile = ({ route, navigation }) => {
 
-  const userId = route.params.userId
+  const userId = route.params.userId;
+  const id_pengguna = userId;
 
   const [selectedImage, setSelectedImage] = useState('')
 
@@ -117,11 +118,11 @@ const UpdateProfile = ({ route, navigation }) => {
 
   const handleUpdateData = async () => {
     if (!selectedImage) {
-      const colRef = doc(firestore, "users", userId);
+      const colRef = doc(firestore, "penyewa", id_pengguna);
       const dataUpdate = {
-        fullname: inputs.fullname.value ? inputs.fullname.value : route.params.fullname,
+        nama: inputs.fullname.value ? inputs.fullname.value : route.params.fullname,
         gender: inputs.gender.value,
-        nomorTelp: inputs.nomorTelp.value ? inputs.nomorTelp.value : route.params.nomorTelp,
+        telepon: inputs.nomorTelp.value ? inputs.nomorTelp.value : route.params.nomorTelp,
         provinsi: inputs.provinsi.value ? inputs.provinsi.value : route.params.provinsi,
         kota: inputs.kota.value ? inputs.kota.value : route.params.kota,
       };
@@ -144,7 +145,7 @@ const UpdateProfile = ({ route, navigation }) => {
 
       if (selectedImage) {
         try {
-          const colref = doc(firestore, "users", userId);
+          const colref = doc(firestore, "penyewa", id_pengguna);
           const docSnapshot = await getDoc(colref);
 
           if (docSnapshot.exists()) {
@@ -185,13 +186,13 @@ const UpdateProfile = ({ route, navigation }) => {
             setSnackbarVisible(true);
           }, async () => {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            const colRef = doc(firestore, "users", userId);
+            const colRef = doc(firestore, "penyewa", id_pengguna);
 
             const dataUpdateWithImage = {
-              fullname: inputs.fullname.value ? inputs.fullname.value : route.params.fullname,
+              nama: inputs.fullname.value ? inputs.fullname.value : route.params.fullname,
               imageUri: downloadURL,
               gender: inputs.gender.value,
-              nomorTelp: inputs.nomorTelp.value ? inputs.nomorTelp.value : route.params.nomorTelp,
+              telepon: inputs.nomorTelp.value ? inputs.nomorTelp.value : route.params.nomorTelp,
               provinsi: inputs.provinsi.value ? inputs.provinsi.value : route.params.provinsi,
               kota: inputs.kota.value ? inputs.kota.value : route.params.kota,
             };
