@@ -5,7 +5,6 @@ import { firebaseAuth, firestore } from '../config/firebase';
 import { destroyKey } from '../config/localStorage';
 import { doc, getDoc } from 'firebase/firestore';
 import { useIsFocused } from '@react-navigation/native';
-import Navbar from '../component/Navbar';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import Dropdown from '../component/Dropdown';

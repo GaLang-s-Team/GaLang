@@ -11,7 +11,6 @@ import TopbarBack from '../component/TopbarBack';
 import { firestore, storage } from '../config/firebase';
 import { FlatList } from 'react-native-gesture-handler';
 import NavDash from '../component/NavDash';
-import { setLogLevel } from 'firebase/app';
 
 export default function TransaksiReview({ navigation, route }) {
   const { userId } = route.params;
@@ -90,24 +89,38 @@ export default function TransaksiReview({ navigation, route }) {
     fetchPermintaan();
     fetchAktif();
     setLoading(false)
-  }, [isFocused, userId, mode]);
+  }, [isFocused, mode]);
   
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: null
     });
-  }, [isFocused, userId, mode]);
+  }, [isFocused, mode]);
 
   const handleTerima = async (transaksiId) => {
     setLoading(true)
     const docRef = query(collection(firestore, 'informasi_penyewaan'), where('id_transaksi', '==', transaksiId));
-    const docId = (await getDocs(docRef)).docs[0].id;
+    const docSnapshot = await getDocs(docRef);
+    const docId = docSnapshot.docs[0].id;
 
     try {
       const informasiPenyewaanRef = doc(firestore, 'informasi_penyewaan', docId);
       await updateDoc(informasiPenyewaanRef, {
         status: 'Menunggu Pembayaran',
       });
+
+      try {
+        const q = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', docSnapshot.docs[0].data().peralatan));
+        const querySnapshot = await getDocs(q);
+        
+        const docSnapId = querySnapshot.docs[0].id;
+        await updateDoc(doc(firestore, 'peralatan', docSnapId), {
+          jumlah_sewa: querySnapshot.docs[0].data().jumlah_sewa + 1,
+          ketersediaan: querySnapshot.docs[0].data().ketersediaan - docSnapshot.docs[0].data().jumlah,
+        });
+      } catch (error) {
+        Alert.alert('Error', 'Failed: ' + error.message);
+      }
 
       console.log('Status updated successfully');
     } catch (error) {
@@ -200,7 +213,7 @@ export default function TransaksiReview({ navigation, route }) {
           <Text style={{ color:mode === 'aktif' ? '#FFFFFF' : '#004268', fontWeight:'bold' }}>Aktif</Text>
         </Pressable>
       </View>
-      { mode === 'permintaan' && !loading && (
+      { mode === 'permintaan' && !loading && peralatanPermintaan.length != 0 && (
         <FlatList
           data={transaksiPermintaan}
           keyExtractor={(item) => item.id}
@@ -208,22 +221,25 @@ export default function TransaksiReview({ navigation, route }) {
           contentContainerStyle={{paddingHorizontal: 20}}
         />
       )}
-      { mode === 'aktif' && !loading && (
+      { mode === 'permintaan' && !loading && peralatanPermintaan.length == 0 && (
+        <View style={{flex:1, justifyContent:'center'}}>
+          <Text style={{textAlign:'center', color:'#004268', fontSize:16, fontWeight:'semibold'}}>Tidak ada pengajuan sewa</Text>
+        </View>
+      )}
+      { mode === 'aktif' && !loading && peralatanAktif.length != 0 && (
         <FlatList
-          data={transaksiAktif}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => renderAktif({ peralatan: peralatanAktif, transaksi: item })}
-          contentContainerStyle={{paddingHorizontal: 20}}
+        data={transaksiAktif}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => renderAktif({ peralatan: peralatanAktif, transaksi: item })}
+        contentContainerStyle={{paddingHorizontal: 20}}
         />
       )}
-      <NavDash route={route}/>
-      <Modal transparent={true} animationType="none" visible={loading} onRequestClose={() => {}}>
-        <View style={styles.modalBackground}>
-          <View style={styles.activityIndicatorWrapper}>
-            <ActivityIndicator animating={loading} size="large" color="#459708" />
-          </View>
+      { mode === 'aktif' && !loading && peralatanAktif.length == 0 && (
+        <View style={{flex:1, justifyContent:'center'}}>
+          <Text style={{textAlign:'center', color:'#004268', fontSize:16, fontWeight:'semibold'}}>Tidak ada transaksi aktif</Text>
         </View>
-      </Modal>
+      )}
+      <NavDash route={route}/>
     </KeyboardAvoidingView>
   );
 }

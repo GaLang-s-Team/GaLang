@@ -28,7 +28,7 @@ const NavDash = ({ route }) => {
       navigation.navigate('TransaksiReview', {userId: userId});
     }
     const handleToRiwayat = () => {
-      navigation.navigate('Dashboard', {userId: userId});
+      navigation.navigate('History', {userId: userId});
     }
     const handleToProfile = () => {
       navigation.navigate('ProfilDash', {userId: userId});

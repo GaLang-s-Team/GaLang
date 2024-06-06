@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Dimensions, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Dimensions, Image, TouchableOpacity, Alert } from 'react-native';
 import { launchImageLibraryAsync } from 'expo-image-picker';
 import { firebaseAuth, firestore, storage } from '../config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -64,29 +64,97 @@ export default function PembayaranReview ({ navigation, route }) {
                 var docID = querySnapshot.docs[0].id;
                 const colRef = doc(firestore, "informasi_penyewaan", docID);
                 await updateDoc(colRef, {
-                    pembayaran: true
+                    pembayaran: true,
+                    status: 'Aktif'
                 })
-                console.log('upload sukses')
             }
-            console.log('upload success');
         } catch (error) {
-            console.error('Failed to upload pembayaran:', error);
+            console.error('Failed:', error);
         }
 
         fetchData();
         setIsLoading(false)
     };
-
+    
     const handleTolakPembayaran = async () => {
-        
+        const tolakPembayaran = async () => {
+            try {
+                const q = query(collection(firestore, "informasi_penyewaan"), where("id_transaksi", "==", transaksiId));
+                const querySnapshot = await getDocs(q);
+    
+                var docID = querySnapshot.docs[0].id;
+                const colRef = doc(firestore, "informasi_penyewaan", docID);
+                await updateDoc(colRef, {
+                    status: 'Ditolak'
+                })
+                navigation.goBack();
+            } catch (error) {
+                console.error('Failed:', error);
+            }
+        }
+
+        Alert.alert(
+            'Konfirmasi',
+            'Apakah anda yakin ingin menolak pembayaran ini?',
+            [
+                {
+                    text: 'Batal',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel'
+                },
+                {
+                    text: 'Ya',
+                    onPress: () => tolakPembayaran()
+                }
+            ]
+        );
     }
 
     const handleTerimaPengembalian = async () => {
+        Alert.alert(
+            'Konfirmasi',
+            'Apakah anda yakin ingin menyelesaikan transaksi ini?',
+            [
+                {
+                    text: 'Batal',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel'
+                },
+                {
+                    text: 'Ya',
+                    onPress: async () => {
+                        setIsLoading(true);
+                        try {
+                            const q = query(collection(firestore, "informasi_penyewaan"), where("id_transaksi", "==", transaksiId));
+                            const querySnapshot = await getDocs(q);
+        
+                            var docID = querySnapshot.docs[0].id;
+                            const colRef = doc(firestore, "informasi_penyewaan", docID);
+                            await updateDoc(colRef, {
+                                status: 'Selesai'
+                            });
 
-    }
+                            const qty = querySnapshot.docs[0].data().jumlah;
 
-    if (isLoading) {
-        return <></>;
+                            const peralatanRef = collection(firestore, "peralatan");
+                            const queryPeralatan = query(peralatanRef, where('id_peralatan', '==', querySnapshot.docs[0].data().peralatan));
+                            const snapshotPeralatan = await getDocs(queryPeralatan);
+                            
+                            const peralatanDoc = snapshotPeralatan.docs[0];
+                            const peralatanRefUpdate = doc(firestore, "peralatan", peralatanDoc.id);
+
+                            await updateDoc(peralatanRefUpdate, {
+                                ketersediaan: peralatanDoc.data().ketersediaan + qty
+                            });
+
+                            navigation.goBack();
+                        } catch (error) {
+                            console.error('Failed:', error);
+                        }
+                    }
+                }
+            ]
+        );
     }
 
     return (
@@ -102,7 +170,7 @@ export default function PembayaranReview ({ navigation, route }) {
                 </View>
             </View>
             <Text style={{marginTop: 20, color: '#004268', marginBottom: 20, fontSize:21, fontWeight:'bold'}}>Bukti Pembayaran</Text>
-            {uploadedImage && (
+            {uploadedImage && !isLoading && (
                 <Image source={{ uri: uploadedImage }} style={{ width: '100%', height: 275, borderRadius: 10 }} />
             )}
             <View style={{position: 'absolute', bottom: 20, width: '100%', left: 20, zIndex:1}}>

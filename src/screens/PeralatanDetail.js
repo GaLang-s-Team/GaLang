@@ -126,30 +126,16 @@ export default function PeralatanDetail({ navigation, route }) {
       pengambilan: takingDate.toString().substring(0, 15),
       pengembalian: addDate(takingDate, duration).toString().substring(0, 15),
       status: 'Menunggu Konfirmasi',
-      pembatalan: false,
       pembayaran: false,
       bukti_pembayaran: '',
       penyedia: penyedia,
       penyewa: String(userId),
       rating: 0,
+      dikembalikan: false,
     };
 
-    try {
-      const q = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', peralatanId));
-      const querySnapshot = await getDocs(q);
-      
-      const docId = querySnapshot.docs[0].id;
-      await updateDoc(doc(firestore, 'peralatan', docId), {
-        jumlah_sewa: querySnapshot.docs[0].data().jumlah_sewa + 1,
-        ketersediaan: querySnapshot.docs[0].data().ketersediaan - quantity,
-      });
-
-      await addDoc(collection(firestore, 'informasi_penyewaan'), informasiPenyewaan);
-
-      setModalVisible(true)
-    } catch (error) {
-      Alert.alert('Error', 'Failed to add peralatan: ' + error.message);
-    }
+    await addDoc(collection(firestore, 'informasi_penyewaan'), informasiPenyewaan);
+    setModalVisible(true)
   }
   
   const handleAddtoGarasi = async () => {

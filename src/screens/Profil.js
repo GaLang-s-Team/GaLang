@@ -55,10 +55,10 @@ const Profil = ({ navigation, route }) => {
             </Text>
 
             <View style={{ marginTop: "27%", alignItems: 'center', zIndex: 1 }}>
-                <Image
+                {/* <Image
                     source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.nama}` }}
                     style={{ width: 100, height: 100, borderRadius: 50 }}
-                />
+                /> */}
                 <View style={{ alignItems: 'center', marginTop: 9 }}>
                     {dataUsers ? (
                         <>
@@ -83,7 +83,7 @@ const Profil = ({ navigation, route }) => {
                     onPress={() => navigation.navigate('UpdateProfile', {
                         userId: userId,
                         fullname: dataUsers.nama,
-                        imageUri: dataUsers.imageUri,
+                        // imageUri: dataUsers.imageUri,
                         gender: dataUsers.gender,
                         nomorTelp: dataUsers.telepon,
                         provinsi: dataUsers.provinsi,

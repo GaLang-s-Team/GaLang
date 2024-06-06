@@ -24,6 +24,7 @@ import Garasi from '../screens/Garasi';
 import TransaksiPenyewaan from '../screens/TransaksiPenyewaan';
 import PembayaranTagihan from '../screens/PembayaranTagihan';
 import PeralatanEdit from '../screens/PeralatanEdit';
+import HistoryPenyewaan from '../screens/HistoryPenyewaan';
 
 const Stack = createStackNavigator()
 
@@ -38,6 +39,7 @@ const Routes = () => {
             <Stack.Screen name='Signup' component={Signup} options={{ headerShown:false }}/>
             <Stack.Screen name= 'Home' component ={Home} options={{ headerShown:false }}/>
             <Stack.Screen name='Dashboard' component={Dashboard} options={{ headerShown:false }}/>
+            <Stack.Screen name='History' component={HistoryPenyewaan} options={{ headerShown:false }}/>
             <Stack.Screen name='PeralatanDetail' component={PeralatanDetail} options={{ headerShown:false }}/>
             <Stack.Screen name='PeralatanInsert' component={PeralatanInsert} options={{ headerShown:false }}/>
             <Stack.Screen name='PeralatanEdit' component={PeralatanEdit} options={{ headerShown:false }}/>

@@ -95,7 +95,7 @@ export default function PeralatanInsert({ navigation, route }) {
       nama: peralatanName,
       ketersediaan: parseInt(peralatanQuantity),
       harga: parseFloat(peralatanPrice),
-      rating: 9,
+      rating: 0,
       jumlah_sewa: 0,
       kategori: selectedCategory,
       ukuran: peralatanSizes,
