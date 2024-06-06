@@ -82,30 +82,40 @@ const Signup = () => {
                 role: dataRegister.role,
             };
 
-            const docRefRole = {
-                id_pengguna: id_pengguna,
-                email: dataRegister.email,
-                nama: dataRegister.fullname,
-                kota: "",
-                provinsi: "",
-                telepon: "",
-                alamat: "",
-                rating: 0,
-                review_tagihan: false,
-                status_tagihan: "berjalan",
-                tagihan: 0,
-                bukti_tagihan: "",
-                diskon_tagihan: false
-            };
-
-            console.log("docRef Created : ", docRef.role);
-
             // Conditional Witing Berdasarkan Role 
             // console.log("Penyewaaa",role);
             await setDoc(doc(firestore, "users", userId), docRef);
             if (docRef.role === 'Penyewa'){
+                const docRefRole = {
+                    id_pengguna: id_pengguna,
+                    email: dataRegister.email,
+                    nama: dataRegister.fullname,
+                    kota: "",
+                    provinsi: "",
+                    telepon: "",
+                    alamat: "",
+                    imageUri: "",
+                };
+
                 await setDoc(doc(firestore, "penyewa", id_pengguna), docRefRole)
             }else if (docRef.role === 'Penyedia') {
+                const docRefRole = {
+                    id_pengguna: id_pengguna,
+                    email: dataRegister.email,
+                    nama: dataRegister.fullname,
+                    kota: "",
+                    provinsi: "",
+                    telepon: "",
+                    alamat: "",
+                    imageUri: "",
+                    rating: 0,
+                    review_tagihan: false,
+                    status_tagihan: "berjalan",
+                    tagihan: 0,
+                    bukti_tagihan: "",
+                    diskon_tagihan: false
+                };
+
                 await setDoc(doc(firestore, "penyedia", id_pengguna), docRefRole)
             }
             console.log("Document set in Firestore");
