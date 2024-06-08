@@ -93,34 +93,35 @@ const Garasi = ({ navigation, route }) => {
         fetchData();     
     }, [])
 
-    if (isLoading) {
-        return <Text>Loading...</Text>;
-    }
-
     return (
         <View style={styles.container}>
-            <TopbarBack navigation={navigation} title='Keranjang' />
-            
-            <FlatList
-                data={peralatan}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.item}>
-                        <Image source={{ uri: item.foto }} style={styles.itemImage} />
-                        <View style={styles.itemInfo}>
-                            <Text style={[styles.itemText, styles.itemTextProductName]}>{item.nama}</Text>
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity style={[styles.button, {marginRight: 20,}]} onPress={() => navigation.navigate('PeralatanDetail', { userId: userId, peralatanId: item.id_peralatan })}>
-                                    <Text style={{color: 'white'}}>Detail</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={[styles.button, {backgroundColor: '#FB0A0A'}]} onPress={() => deleteItem(item.id_peralatan)}>
-                                    <Text style={{color: 'white'}}>Delete</Text>
-                                </TouchableOpacity>
+            <TopbarBack navigation={navigation} title='Keranjang'/>
+            <View style={{flex:1}}>
+                <View style={{alignItems:'center', justifyContent:'Center', height:'70%'}}>
+                    { peralatan.length === 0 && <Text style={{textAlign:'center', justifyContent:'center'}}>Belum ada peralatan ditambahkan</Text> }
+                </View>
+                { !isLoading &&
+                <FlatList
+                    data={peralatan}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => (
+                        <View style={styles.item}>
+                            <Image source={{ uri: item.foto }} style={styles.itemImage} />
+                            <View style={styles.itemInfo}>
+                                <Text style={[styles.itemText, styles.itemTextProductName]}>{item.nama}</Text>
+                                <View style={styles.buttonContainer}>
+                                    <TouchableOpacity style={[styles.button, {marginRight: 20,}]} onPress={() => navigation.navigate('PeralatanDetail', { userId: userId, peralatanId: item.id_peralatan })}>
+                                        <Text style={{color: 'white'}}>Detail</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.button, {backgroundColor: '#FB0A0A'}]} onPress={() => deleteItem(item.id_peralatan)}>
+                                        <Text style={{color: 'white'}}>Delete</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
-                    </View>
-                )}
-            />
+                    )}
+                /> }
+            </View>
             <Navbar route={route} />
         </View>
         

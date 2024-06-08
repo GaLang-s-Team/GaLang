@@ -11,6 +11,8 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
   const [selectedMenu, setSelectedMenu] = useState('Menunggu');
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [rating, setRating] = useState(0);
   const { userId } = route.params;
 
   const fetchData = async () => {
@@ -63,6 +65,55 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
     const dateB = new Date(b.pengambilan);
     return dateA - dateB;
   });
+
+  const openModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleRating = (rating) => {
+    setRating(rating);
+    closeModal();
+    
+    console.log('Rating submitted: ', rating);
+  };
+
+  const ratingModal = ({ isVisible, onClose, onSubmit }) => {  
+    const handleStarPress = (index) => {
+      setRating(index + 1);
+    };
+  
+    return (
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={isVisible}
+        onRequestClose={onClose}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Rate the Product</Text>
+            <View style={styles.starsContainer}>
+              {[...Array(5)].map((_, index) => (
+                <TouchableOpacity key={index} onPress={() => handleStarPress(index)}>
+                  <FontAwesome
+                    name={index < rating ? 'star' : 'star-o'}
+                    size={32}
+                    color="gold"
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Button title="Submit" onPress={() => onSubmit(rating)} />
+            <Button title="Close" onPress={onClose} />
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -117,6 +168,10 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
           )}
         />
       )}
+      <View style={styles.container}>
+        <Button title="Rate Product" onPress={openModal} />
+        {ratingModal(isModalVisible, closeModal, handleRating)}
+    </View>
       <View style={{position: 'absolute', bottom: 0, width: width}}>
         <Navbar route={route} />
       </View>   
@@ -212,6 +267,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 7,
     width: 115,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    marginBottom: 20,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
   },
 });
 

@@ -22,7 +22,16 @@ export default function Search({ navigation, route }) {
 
     setLoading(true);
     try {
-      const peralatanRef = query(collection(firestore, 'peralatan'), where('nama', '>=', searchQuery));
+      parseQuery = searchQuery.split(' ');
+      arrayQuery = [];
+      
+      for (let i = 0; i < parseQuery.length; i++) {
+        arrayQuery.push(capitalizeFirstLetter(parseQuery[i]));
+        arrayQuery.push(toLowerCase(parseQuery[i]));
+        arrayQuery.push(toUpperCase(parseQuery[i]));
+      }
+
+      const peralatanRef = query(collection(firestore, 'peralatan'), where('search', 'array-contains-any', arrayQuery));
       const peralatanDoc = await getDocs(peralatanRef);
       const results = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setSearchResults(results);
@@ -44,6 +53,19 @@ export default function Search({ navigation, route }) {
   function formatRating(num) {
     if (num != 0) return `★${num}`;
     else return `Belum Diulas`;
+  }
+
+  function capitalizeFirstLetter(str) {
+    if (str.length === 0) return str;
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
+  function toLowerCase(str) {
+    return str.toLowerCase();
+  }
+
+  function toUpperCase(str) {
+    return str.toUpperCase();
   }
 
   const renderItem = ({ item }) => (

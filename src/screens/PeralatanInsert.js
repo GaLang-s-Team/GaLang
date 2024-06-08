@@ -102,6 +102,7 @@ export default function PeralatanInsert({ navigation, route }) {
       deskripsi: peralatanDescription,
       foto: imageUrls,
       penyedia: userId,
+      search: searchGrams(peralatanName)
     };
 
     try {
@@ -122,6 +123,33 @@ export default function PeralatanInsert({ navigation, route }) {
       setLoading(false); // Akhiri loading
     }
   };
+
+  const searchGrams = (str) => {
+    let grams = [];
+    let text = str.split(' ');
+
+    for (let i = 0; i < text.length; i++) {
+      grams.push(capitalizeFirstLetter(text[i]));
+      grams.push(toLowerCase(text[i]));
+      grams.push(toUpperCase(text[i]));
+    }
+
+    return grams;
+  };
+
+
+  function capitalizeFirstLetter(str) {
+    if (str.length === 0) return str;
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
+  function toLowerCase(str) {
+    return str.toLowerCase();
+  }
+
+  function toUpperCase(str) {
+    return str.toUpperCase();
+  }
 
   return (
     <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
