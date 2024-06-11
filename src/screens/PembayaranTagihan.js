@@ -103,7 +103,7 @@ const PembayaranTagihan = ({ navigation, route }) => {
                 })
                 console.log('upload sukses')
             }
-            Alert.alert('Pembayaran Tagihan', 'Upload bukti pembayaran tagihan berhasil');
+            Alert.alert('Pembayaran Tagihan', 'Unggah bukti pembayaran tagihan berhasil');
             navigation.navigate('Dashboard', { userId: userId });
         } catch (error) {
             console.error('Failed to upload pembayaran:', error);

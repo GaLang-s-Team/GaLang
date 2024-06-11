@@ -15,6 +15,9 @@ export default function PembayaranReview ({ navigation, route }) {
     const [productName, setProductName] = useState(null);
     const [pembayaran, setPembayaran] = useState(null);
     const [productImage, setProductImage] = useState(null);
+    const [jumlah, setJumlah] = useState(0);
+    const [pengambilan, setPengambilan] = useState('');
+    const [pengembalian, setPengembalian] = useState('');
     const [orderAmount, setOrderAmount] = useState(null);
     const [uploadedImage, setUploadedImage] = useState(null);
     const [isLoading, setIsLoading] = useState(null);
@@ -33,13 +36,19 @@ export default function PembayaranReview ({ navigation, route }) {
             
             const productName = snapshotPeralatan.docs[0].data().nama;
             const pembayaran = snapshotInformasiPenyewaan.docs[0].data().pembayaran;
-            const productImage = snapshotPeralatan.docs[0].data().foto;
+            const productImage = snapshotPeralatan.docs[0].data().foto.split(',')[0];
+            const jumlah = snapshotInformasiPenyewaan.docs[0].data().jumlah;
+            const pengambilan = snapshotInformasiPenyewaan.docs[0].data().pengambilan;
+            const pengembalian = snapshotInformasiPenyewaan.docs[0].data().pengembalian;
             const orderAmount = snapshotInformasiPenyewaan.docs[0].data().total_harga;
             const uploadedImage = snapshotInformasiPenyewaan.docs[0].data().bukti_pembayaran;
 
             setProductName(productName);
             setPembayaran(pembayaran);
             setProductImage(productImage);
+            setJumlah(jumlah);
+            setPengambilan(pengambilan);
+            setPengembalian(pengembalian);
             setOrderAmount(orderAmount);
             setUploadedImage(uploadedImage);
         } catch (error) {
@@ -67,6 +76,20 @@ export default function PembayaranReview ({ navigation, route }) {
                     pembayaran: true,
                     status: 'Aktif'
                 })
+
+                const penyediaRef = query(collection(firestore, 'penyedia'), where('id_pengguna', '==', userId));
+                const penyediaDoc = await getDocs(penyediaRef);
+                const penyediaId = penyediaDoc.docs[0].id;
+                await updateDoc(doc(firestore, 'penyedia', penyediaId), {
+                    tagihan: penyediaDoc.docs[0].data().tagihan + (docSnapshot.docs[0].data().total_harga * 0.025),
+                    transaksi: penyediaDoc.docs[0].data().transaksi + 1,                
+                });
+
+                if (penyediaDoc.docs[0].data().booster > 0) {
+                    await updateDoc(doc(firestore, 'penyedia', penyediaId), {
+                        booster: penyediaDoc.docs[0].data().booster - 1
+                    });
+                }
             }
         } catch (error) {
             console.error('Failed:', error);
@@ -87,6 +110,20 @@ export default function PembayaranReview ({ navigation, route }) {
                 await updateDoc(colRef, {
                     status: 'Ditolak'
                 })
+
+                const qty = querySnapshot.docs[0].data().jumlah;
+
+                const peralatanRef = collection(firestore, "peralatan");
+                const queryPeralatan = query(peralatanRef, where('id_peralatan', '==', querySnapshot.docs[0].data().peralatan));
+                const snapshotPeralatan = await getDocs(queryPeralatan);
+                
+                const peralatanDoc = snapshotPeralatan.docs[0];
+                const peralatanRefUpdate = doc(firestore, "peralatan", peralatanDoc.id);
+
+                await updateDoc(peralatanRefUpdate, {
+                    ketersediaan: peralatanDoc.data().ketersediaan + qty
+                });
+
                 navigation.goBack();
             } catch (error) {
                 console.error('Failed:', error);
@@ -157,6 +194,11 @@ export default function PembayaranReview ({ navigation, route }) {
         );
     }
 
+    function formatHarga(num) {
+        if (num === null) return 0;
+        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+    }
+
     return (
       <View style={{flex:1}}>
         <TopbarBack navigation={navigation} title={'Review Pembayaran'}/>
@@ -166,17 +208,23 @@ export default function PembayaranReview ({ navigation, route }) {
                 <Image source={{ uri: productImage }} style={{ width: width * 0.3, height: width * 0.3, borderRadius: 10, }} />
                 <View style={{ padding: 5, flex: 1, paddingLeft: 20 }}>
                     <Text style={{ color:'#004268', fontWeight:'bold', fontSize:18 }}>{productName}</Text>
-                    <Text style={{ color:'#004268', fontWeight:'semibold', fontSize:14 }}>Pembayaran: {pembayaran ? 'Diterima' : 'Belum / Ditolak'}</Text>
+                    <Text style={{ color: '#004268', marginTop: 5 }}>Jumlah: {jumlah}</Text>
+                    <Text style={{ color: '#004268' }}>Pengambilan: {pengambilan}</Text>
+                    <Text style={{ color: '#004268' }}>Pengembalian: {pengembalian}</Text>
+                    <Text style={{ color:'#004268', marginTop:10 }}>Pembayaran: {pembayaran ? 'Diterima' : 'Belum / Ditolak'}</Text>
                 </View>
             </View>
             <Text style={{marginTop: 20, color: '#004268', marginBottom: 20, fontSize:21, fontWeight:'bold'}}>Bukti Pembayaran</Text>
             {uploadedImage && !isLoading && (
                 <Image source={{ uri: uploadedImage }} style={{ width: '100%', height: 275, borderRadius: 10 }} />
             )}
+            {!uploadedImage && !isLoading && (
+                <Text style={{ color: '#004268', textAlign: 'center', marginTop: 20, fontSize:14 }}>Bukti pembayaran belum diupload</Text>
+            )}
             <View style={{position: 'absolute', bottom: 20, width: '100%', left: 20, zIndex:1}}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={{color: '#9B9B9B'}}>Total Tagihan:</Text>
-                    <Text>{'Rp'+orderAmount}</Text>
+                    { !isLoading && <Text>Rp{formatHarga(orderAmount)}</Text> }
                 </View>
                 {!pembayaran ? (
                   <View style={{flexDirection:'row',}}>

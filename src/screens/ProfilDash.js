@@ -33,13 +33,13 @@ const ProfilDash = ({ navigation, route }) => {
         }).finally(() => {
             setIsLoading(false);
         });
-    }, [isFocused, userId]);
+    }, [isFocused, userId, dataUsers]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
             headerLeft: null,
         });
-    }, [isFocused, userId]);
+    }, [isFocused, userId, dataUsers]);
     
 
     return (
@@ -150,7 +150,7 @@ const ProfilDash = ({ navigation, route }) => {
                             <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.kota}</Text>
                     </View>
                 </View>
-                <TouchableOpacity style={styles.tags} onPress={handleLogout}>
+                <TouchableOpacity style={[styles.tags, {marginBottom:10}]} onPress={handleLogout}>
                             <Image source={require('../../assets/Logout.png')}
                                 // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
                                 style={{ width: 39, height: 39, borderRadius: 50 }}

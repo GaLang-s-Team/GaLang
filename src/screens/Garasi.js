@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions, Image } from 'react-native';
+import { Alert, View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions, Image } from 'react-native';
 import Navbar from '../component/Navbar';
 import { collection, getDocs, query, where, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { firestore } from '../config/firebase';
@@ -40,11 +40,12 @@ const Garasi = ({ navigation, route }) => {
 
                     if (!snapshotPeralatan.empty) {
                         const peralatanDoc = snapshotPeralatan.docs[0].data();
-                        peralatanData.nama = peralatanDoc.nama || '';
-                        peralatanData.foto = peralatanDoc.foto || '';
+                        if (!peralatanDoc.deleted) {
+                            peralatanData.nama = peralatanDoc.nama || '';
+                            peralatanData.foto = peralatanDoc.foto.split(',')[0] || '';
+                            peralatanArray.push(peralatanData);
+                        }
                     }
-
-                    peralatanArray.push(peralatanData);
                 }
             }
 
@@ -59,34 +60,41 @@ const Garasi = ({ navigation, route }) => {
     }
 
     const deleteItem = async (id_peralatan) => {
-        setIsLoading(true);
-        try {
-            // Assuming each item in 'keranjang' collection has a unique id
-            const keranjangRef = collection(firestore, 'keranjang');
-            const queryKeranjang = query(keranjangRef, where('userId', '==', userId));
-            const snapshotKeranjang = await getDocs(queryKeranjang);
+        const deleteItemConfirmed = async (id) =>{
+            setIsLoading(true);
+            try {
+                // Assuming each item in 'keranjang' collection has a unique id
+                const keranjangRef = collection(firestore, 'keranjang');
+                const queryKeranjang = query(keranjangRef, where('userId', '==', userId));
+                const snapshotKeranjang = await getDocs(queryKeranjang);
 
-            if (!snapshotKeranjang.empty) {
-                // Delete each document that matches the query
-                if (snapshotKeranjang.docs[0].data().id_peralatan.includes(',')) {
-                    var arrPeralatan = snapshotKeranjang.docs[0].data().id_peralatan.split(',');
-                    var index = arrPeralatan.indexOf(id_peralatan);
-                    if (index > -1) {
-                        arrPeralatan.splice(index, 1);
+                if (!snapshotKeranjang.empty) {
+                    // Delete each document that matches the query
+                    if (snapshotKeranjang.docs[0].data().id_peralatan.includes(',')) {
+                        var arrPeralatan = snapshotKeranjang.docs[0].data().id_peralatan.split(',');
+                        var index = arrPeralatan.indexOf(id);
+                        if (index > -1) {
+                            arrPeralatan.splice(index, 1);
+                        }
+                        await updateDoc(doc(firestore, 'keranjang', snapshotKeranjang.docs[0].id), {
+                            id_peralatan: arrPeralatan.join(',')
+                        });
+                    } else {
+                        await deleteDoc(doc(firestore, 'keranjang', snapshotKeranjang.docs[0].id));
                     }
-                    await updateDoc(doc(firestore, 'keranjang', snapshotKeranjang.docs[0].id), {
-                        id_peralatan: arrPeralatan.join(',')
-                    });
-                } else {
-                    await deleteDoc(doc(firestore, 'keranjang', snapshotKeranjang.docs[0].id));
+                    // Refresh the data
+                    fetchData();
                 }
-                // Refresh the data
-                fetchData();
+            } catch (error) {
+                console.error("Error deleting item: ", error);
             }
-        } catch (error) {
-            console.error("Error deleting item: ", error);
+            setIsLoading(false);
         }
-        setIsLoading(false);
+
+        Alert.alert('Delete', 'Anda yakin ingin menghapus peralatan ini dari daftar?', [
+            { text: 'Batal', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+            { text: 'Ya', onPress: () => deleteItemConfirmed(id_peralatan) }
+        ]);
     };
 
     useEffect(() => {
@@ -97,9 +105,11 @@ const Garasi = ({ navigation, route }) => {
         <View style={styles.container}>
             <TopbarBack navigation={navigation} title='Keranjang'/>
             <View style={{flex:1}}>
-                <View style={{alignItems:'center', justifyContent:'Center', height:'70%'}}>
-                    { peralatan.length === 0 && <Text style={{textAlign:'center', justifyContent:'center'}}>Belum ada peralatan ditambahkan</Text> }
-                </View>
+                { peralatan.length === 0 &&
+                    <View style={{alignItems:'center', justifyContent:'Center', height:'70%'}}>
+                        <Text style={{textAlign:'center', justifyContent:'center', color: '#004268', marginTop: 20}}>Belum ada peralatan ditambahkan</Text>
+                    </View>
+                }
                 { !isLoading &&
                 <FlatList
                     data={peralatan}
@@ -132,7 +142,7 @@ const Garasi = ({ navigation, route }) => {
 const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row',
-        marginTop: 20,
+        marginTop: 10,
     },
     button: {
         fontSize: 10,
@@ -159,18 +169,16 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: '#fff',
- 
         backgroundColor: '#fff',
     },
     itemImage: {
-        width: width * 0.3, 
-        height: width * 0.3,
+        width: width * 0.25, 
+        height: width * 0.25,
         marginRight: 10,
         borderRadius: 5,  
     },
     itemInfo: {
         flex: 1,
-        justifyContent: 'center',
     },
     itemText: {
         fontSize: 12,

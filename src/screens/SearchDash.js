@@ -7,7 +7,7 @@ import { collection, doc, addDoc, query, where, getDoc, getDocs, updateDoc } fro
 
 import { firestore } from '../config/firebase';
 
-export default function Search({ navigation, route }) {
+export default function SearchDash({ navigation, route }) {
   const { userId, keyword } = route.params;
 
   const [loading, setLoading] = useState(false);
@@ -34,13 +34,7 @@ export default function Search({ navigation, route }) {
       const peralatanRef = query(collection(firestore, 'peralatan'), where('search', 'array-contains-any', arrayQuery));
       const peralatanDoc = await getDocs(peralatanRef);
       const results = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      for (let i = 0; i < results.length; i++) {
-        const penyediaRef = doc(firestore, 'penyedia', results[i].penyedia);
-        const penyediaBooster = (await getDoc(penyediaRef)).data().booster;
-        results[i].booster = penyediaBooster;
-      }
-      results.filter(item => item.deleted != true);
-      results.sort((a, b) => b.booster - a.booster);
+      results.filter(result => result.penyedia == userId);
       setSearchResults(results);
     } catch (error) {
       console.error('Error searching: ', error);
@@ -77,7 +71,7 @@ export default function Search({ navigation, route }) {
   }
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('PeralatanDetail', { peralatanId: item.id_peralatan })}>
+    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('PeralatanEdit', { userId: userId, peralatanId: item.id_peralatan })}>
         <Image source={{ uri: item.foto.split(',')[0] }} style={styles.image} />
         <View>
             <Text style={styles.title} numberOfLines={1} ellipsizeMode='tail'>{item.nama}</Text>
@@ -109,7 +103,7 @@ export default function Search({ navigation, route }) {
       <View style={styles.content}>
         { searchResults.length === 0 && !loading &&
           <View style={{ height:'90%', justifyContent:'center', alignItems:'center' }}>
-            <Text style={{ color:'#004268', fontWeight:'semibold', fontSize:14 }}>Peralatan tidak ditemukan</Text>
+            <Text style={{ color:'#004268', fontWeight:'semibold', fontSize:14, textAlign:'center' }}>Peralatan tidak ditemukan pada daftar peralatan Anda</Text>
           </View> }
         <View style={styles.container}>
           <FlatList

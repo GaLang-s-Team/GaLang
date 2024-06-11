@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions, Image } from 'react-native';
+import { Button, Modal, View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions, Image } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { doc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
+
 import Navbar from '../component/Navbar';
-import { collection, query, where, getDocs, } from 'firebase/firestore';
 import { firestore } from '../config/firebase';
 import TopbarBack from '../component/TopbarBack';
 
@@ -10,9 +12,9 @@ const { height, width } = Dimensions.get('window');
 const TransaksiPenyewaan = ({ navigation, route }) => {
   const [selectedMenu, setSelectedMenu] = useState('Menunggu');
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [rating, setRating] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(true);
   const { userId } = route.params;
 
   const fetchData = async () => {
@@ -27,16 +29,23 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
         const queryPeralatan = query(peralatanRef, where('id_peralatan', '==', data.peralatan));
         const snapshotPeralatan = await getDocs(queryPeralatan);
 
-        return {
-          transaksiId: data.id_transaksi,
-          nama: snapshotPeralatan.docs[0].data().nama,
-          ukuran: data.ukuran,
-          jumlah: data.jumlah,
-          pengambilan: data.pengambilan,
-          pengembalian: data.pengembalian,
-          status: data.status,
-          foto: snapshotPeralatan.docs[0].data().foto
-        };
+        if (snapshotPeralatan.docs.length != 0 && data.status != undefined) {
+          console.log(snapshotPeralatan.docs[0].data());
+          return {
+            transaksiId: data.id_transaksi,
+            penyedia: data.penyedia,
+            peralatanId: data.peralatan,
+            penyewaan: snapshotPeralatan.docs[0].data().count_rating,
+            rating: snapshotPeralatan.docs[0].data().rating,
+            nama: snapshotPeralatan.docs[0].data().nama,
+            ukuran: data.ukuran,
+            jumlah: data.jumlah,
+            pengambilan: data.pengambilan,
+            pengembalian: data.pengembalian,
+            status: data.status,
+            foto: snapshotPeralatan.docs[0].data().foto.split(',')[0]
+          };
+        }
       });
 
       const informasiPenyewaanData = await Promise.all(informasiPenyewaanDataPromises);
@@ -53,11 +62,14 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
   }, [selectedMenu])
 
   let filteredData = [];
-  if (selectedMenu === "Menunggu") {
-    filteredData = data.filter(item => item.status === "Menunggu Konfirmasi" || item.status === "Menunggu Pembayaran");
-  }
-  else if (selectedMenu === "Selesai") {
-    filteredData = data.filter(item => item.status === "Ditolak" || item.status === "Selesai" || item.status === "Aktif");
+  if (data.length != 0 && data.status != undefined) {
+    if (selectedMenu === "Menunggu") {
+      filteredData = data.filter(item => item.status === "Menunggu Konfirmasi" || item.status === "Menunggu Pembayaran");
+    }
+    else if (selectedMenu === "Selesai") {
+      console.log(data);
+      filteredData = data.filter(item => item.status === "Ditolak" || item.status === "Selesai" || item.status === "Aktif");
+    }
   }
 
   const sortedFilteredData = filteredData.sort((a, b) => {
@@ -74,16 +86,45 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
     setIsModalVisible(false);
   };
 
-  const handleRating = (rating) => {
-    setRating(rating);
-    closeModal();
-    
-    console.log('Rating submitted: ', rating);
-  };
-
-  const ratingModal = ({ isVisible, onClose, onSubmit }) => {  
+  const ratingModal = (item, isVisible) => {  
     const handleStarPress = (index) => {
       setRating(index + 1);
+    };
+
+    const handleRating = async (item) => {
+      setLoading(true);
+      const transaksiRef = query(collection(firestore, 'informasi_penyewaan'), where('id_transaksi', '==', item.transaksiId));
+      const transaksiId = (await getDocs(transaksiRef)).docs[0].id;
+      await updateDoc(doc(firestore, 'informasi_penyewaan', transaksiId), {
+        rating: rating,
+      });
+  
+      const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', item.peralatanId));
+      const peralatanid = (await getDocs(peralatanRef)).docs[0].id;
+      await updateDoc(doc(firestore, 'peralatan', peralatanid), {
+        rating: (((item.rating * item.penyewaan)  + rating) / (item.penyewaan + 1)),
+        count_rating: item.penyewaan + 1,
+      });
+  
+      const penyediaRef = query(collection(firestore, 'penyedia'), where('id_pengguna', '==', item.penyedia));
+      const penyediaDoc = await getDocs(penyediaRef);
+      const penyediaid = penyediaDoc.docs[0].id;
+      const allPeralatanRef = query(collection(firestore, 'peralatan'), where('penyedia', '==', item.penyedia));
+      const allPeralatan = await getDocs(allPeralatanRef);
+  
+      let sum = 0;
+      let count = 0;
+      allPeralatan.docs.map(doc => {
+        sum += doc.data().rating;
+        count++;
+      });
+  
+      await updateDoc(doc(firestore, 'penyedia', penyediaid), {
+        rating: (sum / count),
+      });
+      closeModal();
+      fetchData();
+      setLoading(false);
     };
   
     return (
@@ -91,24 +132,30 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
         transparent={true}
         animationType="slide"
         visible={isVisible}
-        onRequestClose={onClose}
+        onRequestClose={closeModal}
       >
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Rate the Product</Text>
+            <Text style={styles.modalTitle}>Beri Nilai Peralatan</Text>
             <View style={styles.starsContainer}>
               {[...Array(5)].map((_, index) => (
                 <TouchableOpacity key={index} onPress={() => handleStarPress(index)}>
                   <FontAwesome
                     name={index < rating ? 'star' : 'star-o'}
-                    size={32}
+                    size={50}
                     color="gold"
                   />
                 </TouchableOpacity>
               ))}
             </View>
-            <Button title="Submit" onPress={() => onSubmit(rating)} />
-            <Button title="Close" onPress={onClose} />
+            <View style={{width:150, height:30, flexDirection:'row', justifyContent:'space-between'}}>
+              <TouchableOpacity style={{width:70, height:30, borderRadius:5, backgroundColor: '#FB0A0A', justifyContent:'center', alignItems:'center'}} onPress={closeModal}>
+                <Text style={{color: '#FFFFFF'}}>Batal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{width:70, height:30, borderRadius:5, backgroundColor: '#459708', justifyContent:'center', alignItems:'center'}} onPress={() => handleRating(item)}>
+                <Text style={{color: '#FFFFFF'}}>Kirim</Text> 
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -125,11 +172,12 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
         <TouchableOpacity style={[styles.menuItem, styles.menuItemLeft, selectedMenu === 'Selesai' && styles.activeMenuItem]} onPress={() => setSelectedMenu('Selesai')}>
           <Text style={[styles.menuText, selectedMenu === 'Selesai' && styles.activeMenuText]}>Selesai</Text>
         </TouchableOpacity>
-        
       </View>
-      {loading ? (
+      {loading && data.length!= 0 ? (
         <></>
       ) : (
+        <>
+        {filteredData.length === 0 && <Text style={{ color: '#004268', textAlign: 'center', marginTop: 20 }}>Belum ada transakasi</Text>}
         <FlatList
           data={sortedFilteredData}
           keyExtractor={(item, index) => index.toString()}
@@ -144,34 +192,45 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
                   <Text style={styles.itemText}>Pengambilan: {item.pengambilan}</Text> 
                   <Text style={styles.itemText}>pengembalian: {item.pengembalian}</Text>
                 </View>
-                {item.status === "Menunggu Pembayaran"? 
+                {item.status === "Menunggu Pembayaran"? (
                   <TouchableOpacity style={styles.itemPeriodContainer} onPress={() => navigation.navigate('UploadPembayaran', { userId: userId, transaksiId: item.transaksiId})}>
-                    <Text style={[styles.itemPeriod, {backgroundColor: 'blue'}]}>Bayar</Text> 
+                    <Text style={[styles.itemPeriod, {backgroundColor: '#459708'}]}>Bayar</Text> 
                   </TouchableOpacity>                 
-                  : 
-                  <View style={styles.itemPeriodContainer}>
-                    <Text style={[
-                      styles.itemPeriod,
-                      { 
-                        backgroundColor: 
-                          item.status === 'Menunggu Konfirmasi' ? 'grey' : 
-                          item.status === 'Aktif' ? 'green' : 
-                          item.status === 'Ditolak' ? 'red' : '#E4E7C9' // default color if no match
-                      }
-                    ]}>
-                      {item.status}
-                    </Text>
-                  </View>
-                }
+                ) : (
+                  <>
+                    {item.status === "Selesai" && item.rating === 0 ? (
+                      <>
+                        <TouchableOpacity style={styles.itemPeriodContainer} onPress={openModal}>
+                          <Text style={[styles.itemPeriod, {backgroundColor: '#459708'}]}>Beri Nilai</Text> 
+                          { isModalVisible && ratingModal(item, isModalVisible)}
+                        </TouchableOpacity>
+                      </>
+                    ):(
+                      <View style={styles.itemPeriodContainer}>
+                        <Text style={[
+                          styles.itemPeriod,
+                          { 
+                            backgroundColor: 
+                              item.status === 'Menunggu Konfirmasi' ? 'grey' :
+                              item.status === 'Aktif' ? '#459708' :
+                              item.status === 'Ditolak' ? '#FB0A0A' :
+                              item.status === 'Selesai' ? '#459708' : ''
+                          }
+                        ]}>
+                          {item.status}
+                        </Text>
+                      </View>
+                    )}
+                  </>
+                )}
               </View>
             </View>
           )}
         />
+        </>
       )}
       <View style={styles.container}>
-        <Button title="Rate Product" onPress={openModal} />
-        {ratingModal(isModalVisible, closeModal, handleRating)}
-    </View>
+      </View>
       <View style={{position: 'absolute', bottom: 0, width: width}}>
         <Navbar route={route} />
       </View>   
@@ -220,6 +279,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   item: {
+    flex: 1,
     flexDirection: 'row',
     padding: 10,
     marginHorizontal: 15,
@@ -255,11 +315,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   itemPeriodContainer: {
+    width: 90,
     marginTop: 65,
+    justifyContent: 'flex-end',
     alignItems: 'flex-end',
   },
   itemPeriod: {
-    fontSize: 10,
+    fontSize: 14,
     color: 'white', 
     textAlign: 'center',
     backgroundColor: '#51B309',
@@ -282,12 +344,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitle: {
+    color: '#004268',
+    fontWeight: 'bold',
     fontSize: 20,
     marginBottom: 20,
   },
   starsContainer: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: 25,
   },
 });
 

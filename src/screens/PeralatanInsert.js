@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Alert, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Modal } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import TopbarBack from '../component/TopbarBack';
@@ -20,8 +20,30 @@ export default function PeralatanInsert({ navigation, route }) {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(false);
 
+  
   const { userId } = route.params;
+  
+  const [dataUsers, setDataUsers] = useState({});
   const categories = ['Aksesoris', 'Pakaian', 'Peralatan', 'Sepatu', 'Tas', 'Lainnya'];
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const docRef = doc(firestore, 'penyedia', userId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setDataUsers(docSnap.data());
+        } else {
+          console.log('No such user document!');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [userId]);
 
   const pickImage = async (index) => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -61,18 +83,24 @@ export default function PeralatanInsert({ navigation, route }) {
     const response = await fetch(compressedUri);
     const blob = await response.blob();
     const imageRef = ref(storage, `peralatan/${name}`);
-    await uploadBytes(imageRef, blob);
+    try {
+      await uploadBytes(imageRef, blob);
+    } catch (error) {
+      console.error('Error uploading image: ', error);
+      Alert.alert('Gagal', 'Gagal mengunggah foto peralatan, silahkan coba lagi');
+      return null;
+    }
 
     return await getDownloadURL(imageRef);
   };
 
   const handleAddPeralatan = async () => {
     if (images.includes(null)) {
-      Alert.alert('Error', 'Please upload 3 images.');
+      Alert.alert('Error', 'Silahkan unggah 3 foto peralatan');
       return;
     }
     if (!peralatanName || !peralatanPrice || !peralatanDescription || !peralatanQuantity || !peralatanSizes || !selectedCategory) {
-      Alert.alert('Error', 'Please fill in all fields.');
+      Alert.alert('Error', 'Silahkan isi semua kolom yang tersedia');
       return;
     }
     
@@ -102,13 +130,14 @@ export default function PeralatanInsert({ navigation, route }) {
       deskripsi: peralatanDescription,
       foto: imageUrls,
       penyedia: userId,
+      lokasi: dataUsers.kota,
       search: searchGrams(peralatanName)
     };
 
     try {
       // Add peralatan data to Firestore
       await addDoc(collection(firestore, 'peralatan'), peralatanData);
-      Alert.alert('Success', 'Peralatan added successfully!');
+      Alert.alert('Berhasil', 'Peralatan berhasil ditambahkan!');
 
       // Reset form
       setImages([null, null, null]);
@@ -118,7 +147,7 @@ export default function PeralatanInsert({ navigation, route }) {
       setPeralatanQuantity('');
       setPeralatanSizes('');
     } catch (error) {
-      Alert.alert('Error', 'Failed to add peralatan: ' + error.message);
+      Alert.alert('Gagal', 'Gagal menambahkan peralatan peralatan: ' + error.message);
     } finally {
       setLoading(false); // Akhiri loading
     }

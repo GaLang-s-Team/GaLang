@@ -15,6 +15,7 @@ import Profil from '../screens/Profil';
 import UpdateProfile from '../screens/UpdateProfile';
 import UploadPembayaran from '../screens/UploadPembayaran';
 import Search from '../screens/Search';
+import SearchDash from '../screens/SearchDash';
 import TransaksiReview from '../screens/TransaksiReview';
 import PembayaranReview from '../screens/PembayaranReview';
 import TransaksiPenyewa from '../screens/TransaksiPenyewa';
@@ -44,6 +45,7 @@ const Routes = () => {
             <Stack.Screen name='PeralatanInsert' component={PeralatanInsert} options={{ headerShown:false }}/>
             <Stack.Screen name='PeralatanEdit' component={PeralatanEdit} options={{ headerShown:false }}/>
             <Stack.Screen name='Search' component={Search} options={{ headerShown:false }}/>
+            <Stack.Screen name='SearchDash' component={SearchDash} options={{ headerShown:false }}/>
             <Stack.Screen name= 'StatusPenyewaan' component ={StatusPenyewaan} options={{ headerShown:false }}/>
             <Stack.Screen name= 'Profil' component ={Profil} options={{ headerShown:false }}/>
             <Stack.Screen name= 'ProfilDash' component ={ProfilDash} options={{ headerShown:false }}/>

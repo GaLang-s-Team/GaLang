@@ -1,16 +1,10 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { Alert, View, StyleSheet, Image, Dimensions, Text, TouchableOpacity, Pressable, FlatList } from 'react-native';
-import Swiper from 'react-native-swiper';
-import Topback from '../component/Topback';
+import { ActivityIndicator, Alert, View, StyleSheet, Image, Text, TouchableOpacity, Pressable, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { collection, doc, addDoc, query, where, getDoc, getDocs, updateDoc } from 'firebase/firestore';
-import { signOut } from 'firebase/auth'
-import { useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 
-import Navbar from '../component/Navbar';
-import { destroyKey, getKey } from '../config/localStorage'
-import { firebaseAuth, firestore } from '../config/firebase'
+import { firestore } from '../config/firebase'
 import NavDash from '../component/NavDash';
 import TopbackDash from '../component/TopbackDash';
 import { set } from 'firebase/database';
@@ -30,10 +24,9 @@ export default function Dashboard({ navigation, route }) {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    setIsLoading(true);
     const fetchUserData = async () => {
       try {
-        const docRef = doc(firestore, 'users', userId);
+        const docRef = doc(firestore, 'penyedia', userId);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -52,6 +45,7 @@ export default function Dashboard({ navigation, route }) {
         const peralatanDoc = await getDocs(peralatanRef);
         if (!peralatanDoc.empty) {
           const peralatanInfo = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          peralatanInfo.filter(item => item.deleted != true);
           setPeralatan(peralatanInfo);
         } else {
           console.log('No such peralatan!');
@@ -71,14 +65,12 @@ export default function Dashboard({ navigation, route }) {
         }
       } catch (error) {
         console.error('Error fetching peralatan or penyedia:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
     fetchUserData();
     fetchPeralatanAndPenyedia();
-  }, [isFocused, userId]);
+  }, [isFocused, userId, peralatan, tagihan, reviewTagihan, rating]);
 
 
   useLayoutEffect(() => {
@@ -95,7 +87,7 @@ export default function Dashboard({ navigation, route }) {
               <Text style={styles.harga}>Rp{formatHarga(item.harga)}</Text>
               <Text style={styles.rating}>{formatRating(item.rating)}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons name='location-outline' size={20} color='#004268' style={{ marginLeft:9, marginBottom:5 }}/>
+                  <Ionicons name='location-outline' size={20} color='#004268' style={{ marginLeft:7, marginBottom:5 }}/>
                   <Text style={styles.location}>{lokasi}</Text>
               </View>
           </View>
@@ -103,6 +95,7 @@ export default function Dashboard({ navigation, route }) {
   );
 
   const handleBooster = async () => {
+    setIsLoading(true);
     const docRef = query(collection(firestore, 'penyedia'), where('id_pengguna', '==', userId));
     const docId = (await getDocs(docRef)).docs[0].id;
     
@@ -111,31 +104,38 @@ export default function Dashboard({ navigation, route }) {
 
     try {
       if (penyediaDoc) {
-        const currentData = penyediaDoc.data();
-        const currentTagihan = currentData['tagihan'];
+          if (penyediaDoc.data().booster == 0) {
+            const currentData = penyediaDoc.data();
+            const currentTagihan = currentData['tagihan'];
 
-        if (typeof currentTagihan === 'number') {
-          const newTagihan = parseInt(currentTagihan) + parseInt(1000);
+            if (typeof currentTagihan === 'number') {
+              const newTagihan = parseInt(currentTagihan) + parseInt(2500);
 
-          await updateDoc(penyediaRef, {
-            ['tagihan']: newTagihan,
-          });
-          setTagihan(formatHarga(newTagihan));
+              await updateDoc(penyediaRef, {
+                ['tagihan']: newTagihan,
+                ['booster']: 5
+              });
+              setTagihan(formatHarga(newTagihan));
 
-          Alert.alert('Success', 'Booster berhasil diaktifkan.');
+              Alert.alert('Berhasil', 'Booster berhasil diaktifkan');
+            } else {
+              Alert.alert('Gagal', 'Gagal mengaktifkan booster');
+            }
         } else {
-          Alert.alert('Error', 'Gagal mengaktifkan booster.');
+          Alert.alert('Gagal', 'Booster Anda masih aktif');
         }
       } else {
-        Alert.alert('Error', 'No such document.');
+        Alert.alert('Gagal', 'Kesalahan pada sistem, silahkan coba lagi nanti');
       }
     } catch (error) {
       console.error('Error updating document: ', error);
-      Alert.alert('Error', 'Gagal mengaktifkan booster.');
+      Alert.alert('Gagal', 'Gagal mengaktifkan booster');
     }
+    setIsLoading(false);
   }
 
   function formatHarga(num) {
+    if (num === null) return 0;
     return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
   }
 
@@ -146,7 +146,7 @@ export default function Dashboard({ navigation, route }) {
 
   return (
     <View style={{ flex:1 }}>
-        <TopbackDash nama={dataUsers.fullname} route={route} />
+        <TopbackDash nama={dataUsers.nama} route={route} />
         { reviewTagihan ? (
           <Text style={{ marginHorizontal:'auto', marginLeft:20, marginTop:15, fontWeight:'bold',color:'#004268', fontSize:16 }}>Tagihan: Rp{tagihan} (Pembayaran sedang diperiksa)</Text>
         ) : (
@@ -158,20 +158,30 @@ export default function Dashboard({ navigation, route }) {
             <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Bayar Tagihan</Text>
           </Pressable>
           <Pressable style={{ backgroundColor: '#459708', padding: 10, borderRadius: 10, width: '47.5%' }} onPress={handleBooster}>
-              <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold', textAlign: 'center' }}>Aktifkan Booster</Text>
+            { isLoading ? (
+              <ActivityIndicator size={21} color='white' />
+            ) : (
+              <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold', textAlign: 'center' }}>Aktifkan Booster</Text>              
+            )}
           </Pressable>
       </View>
-      <View style={styles.container}>
-          <FlatList
-              data={peralatan}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.id}
-              style={styles.flatListContainer}
-              numColumns={2}
-              columnWrapperStyle={styles.row}
-              contentContainerStyle={styles.flatListContainer}
-          />
-      </View>
+      { peralatan.length === 0 ? (
+        <View style={{flex:1, marginHorizontal:'15', paddingHorizontal:20, justifyContent:'center', alignItems:'center'}}>
+          <Text style={{color:'#004268', fontSize:14}}>Anda belum menambahkan peralatan</Text>
+        </View>
+      ) : (
+        <View style={styles.container}>
+            <FlatList
+                data={peralatan}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                style={styles.flatListContainer}
+                numColumns={2}
+                columnWrapperStyle={styles.row}
+                contentContainerStyle={styles.flatListContainer}
+            />
+        </View>
+      )}
       <TouchableOpacity style={{ position: 'absolute', backgroundColor: '#459708', width: 35, height: 35, bottom: 70, right: 25, borderRadius: 50, justifyContent: 'center', alignItems: 'center' }}
           onPress={() => navigation.navigate('PeralatanInsert', { userId: userId })}>
           <Ionicons name='add' size={24} color='#FFFFFF' />
@@ -226,7 +236,7 @@ const styles = StyleSheet.create({
   },
   rating: {
     color: '#004268',
-    fontSize: 20,
+    fontSize: 14,
     paddingLeft: 10,
   },
   container: {

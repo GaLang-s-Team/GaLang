@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, FlatList, Modal, TouchableWithoutFeedback, Pressable } from 'react-native';
+import { ActivityIndicator, View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, FlatList, Modal, TouchableWithoutFeedback, Pressable } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import Swiper from 'react-native-swiper';
-import { LinearGradient } from 'expo-linear-gradient';
 import { collection, doc, addDoc, query, where, getDocs, updateDoc } from 'firebase/firestore';
 
 import { firestore } from '../config/firebase';
-import { set } from 'firebase/database';
 
 import PopUpSewaSukses from '../component/PopUpSewaSukses';
+import { set } from 'firebase/database';
 
 
 export default function PeralatanDetail({ navigation, route }) {
@@ -18,11 +17,13 @@ export default function PeralatanDetail({ navigation, route }) {
   const [peralatanImages, setPeralatanImages] = useState([]);
   const [peralatanNama, setPeralatanNama] = useState('');
   const [peralatanHarga, setPeralatanHarga] = useState('');
+  const [peralatanKetersediaan, setPeralatanKetersediaan] = useState(0);
   const [peralatanRating, setPeralatanRating] = useState('');
   const [peralatanDisewa, setPeralatanDisewa] = useState('');
   const [peralatanDeskripsi, setPeralatanDeskripsi] = useState('');
   
   const [penyedia, setPenyedia] = useState(null);
+  const [penyediaNama, setPenyediaNama] = useState('');
   const [penyediaProfile, setPenyediaProfile] = useState(null);
 
   const [quantity, setQuantity] = useState(1);
@@ -32,6 +33,7 @@ export default function PeralatanDetail({ navigation, route }) {
   const [duration, setDuration] = useState(1);
 
   const [showDate, setShowDate] = useState(false);
+  const [isOnProcess, setIsOnProcess] = useState(false);
   const [isBuyModalVisible, setBuyModalVisible] = useState(false);
   const [garasiVisible, setGarasiVisible] = useState(false);
   
@@ -58,6 +60,7 @@ export default function PeralatanDetail({ navigation, route }) {
             setPeralatanImages(documentSnapshot.data().foto.split(','));
             setPeralatanNama(documentSnapshot.data().nama);
             setPeralatanHarga(documentSnapshot.data().harga);
+            setPeralatanKetersediaan(documentSnapshot.data().ketersediaan);
             setPeralatanRating(documentSnapshot.data().rating);
             setPeralatanDisewa(documentSnapshot.data().jumlah_sewa);
             setPeralatanDeskripsi(documentSnapshot.data().deskripsi)
@@ -72,7 +75,12 @@ export default function PeralatanDetail({ navigation, route }) {
         const penyediaDoc = await getDocs(penyediaRef);
         if (penyediaDoc) {
           penyediaDoc.forEach(documentSnapshot => {
-            setPenyediaProfile(documentSnapshot.data().profil);
+            setPenyediaNama(documentSnapshot.data().nama);
+            if (documentSnapshot.data().imageUri == '') {
+              setPenyediaProfile(`https://ui-avatars.com/api/?name=${penyediaNama}`);
+            } else {
+              setPenyediaProfile(documentSnapshot.data().imageUri);
+            }
           });
         } else {
           console.log('No such penyedia!');
@@ -85,7 +93,7 @@ export default function PeralatanDetail({ navigation, route }) {
     };
 
     fetchPeralatanAndPenyedia();
-  }, [peralatanId]);
+  }, [peralatanId, penyedia, penyediaNama, penyediaProfile]);
 
   const toggleBuyModal = () => {
     setBuyModalVisible(!isBuyModalVisible);
@@ -96,10 +104,14 @@ export default function PeralatanDetail({ navigation, route }) {
       Alert.alert('Error', 'Silahkan pilih ukuran peralatan');
       return;
     }
+    
+    setIsOnProcess(true);
 
+    let docId
     const getAvailableQuantity = async () => {
       const q = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', peralatanId));
       const querySnapshot = await getDocs(q);
+      docId = querySnapshot.docs[0].id;
       
       return Number(querySnapshot.docs[0].data().ketersediaan);
     };
@@ -109,6 +121,7 @@ export default function PeralatanDetail({ navigation, route }) {
       Alert.alert('Error', 'Jumlah yang diminta melebihi ketersediaan peralatan.');
       return;
     }
+
     
     const getNumber = async () => {
       const q = collection(firestore, 'informasi_penyewaan');
@@ -135,6 +148,7 @@ export default function PeralatanDetail({ navigation, route }) {
     };
 
     await addDoc(collection(firestore, 'informasi_penyewaan'), informasiPenyewaan);
+    setIsOnProcess(false);
     setModalVisible(true)
   }
   
@@ -167,7 +181,12 @@ export default function PeralatanDetail({ navigation, route }) {
     setQuantity((prevQuantity) => Math.max(1, prevQuantity + change));
   };
 
+  const handleDurationChange = (change) => {
+    setDuration((prevQuantity) => Math.max(1, prevQuantity + change));
+  };
+
   function formatHarga(num) {
+    if (num === null) return 0;
     return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
   }
 
@@ -227,7 +246,7 @@ export default function PeralatanDetail({ navigation, route }) {
             <Image source={{ uri: penyediaProfile }} style={styles.storeImage} />
           </TouchableOpacity>
           <View style={styles.storeInfo}>
-            <Text style={styles.storeName}>Toko</Text>
+            <Text style={styles.storeName}>{penyediaNama}</Text>
             <TouchableOpacity onPress={() => Alert.alert('Store', 'Go to store page!')}>
               <Text style={styles.visitStore}>Lihat Toko</Text>
             </TouchableOpacity>
@@ -235,6 +254,7 @@ export default function PeralatanDetail({ navigation, route }) {
         </View>
         <View style={styles.peralatanDescription}>
           <Text style={styles.sectionTitle}>Deskripsi Peralatan</Text>
+          <Text style={[styles.sectionDescription, {marginBottom:5}]}>Tersedia: {peralatanKetersediaan}</Text>
           <Text style={styles.sectionDescription}>{peralatanDeskripsi}</Text>
         </View>
         <View style={styles.similarPeralatans}>
@@ -312,7 +332,7 @@ export default function PeralatanDetail({ navigation, route }) {
           )}
           <Text style={styles.modalTitle}>Masukkan Lama Penyewaan (Hari)</Text>
           <View style={styles.quantityContainer}>
-            <TouchableOpacity style={styles.quantityButton} onPress={() => handleQuantityChange(-1)}>
+            <TouchableOpacity style={styles.quantityButton} onPress={() => handleDurationChange(-1)}>
               <Ionicons name='remove' size={24} color='#004268' />
             </TouchableOpacity>
             <TextInput
@@ -321,13 +341,16 @@ export default function PeralatanDetail({ navigation, route }) {
               keyboardType='numeric'
               onChangeText={(text) => setDuration(Number(text))}
             />
-            <TouchableOpacity style={styles.quantityButton} onPress={() => handleQuantityChange(1)}>
+            <TouchableOpacity style={styles.quantityButton} onPress={() => handleDurationChange(1)}>
               <Ionicons name='add' size={24} color='#004268' />
             </TouchableOpacity>
           </View>
-          <Pressable style={{backgroundColor:'#459708', padding:10, borderRadius:10}}
-            onPress={handleAjukanSewa}>
-            <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Ajukan Sewa</Text>
+          <Pressable style={{height:45, backgroundColor:'#459708', padding:10, borderRadius:10}} onPress={handleAjukanSewa}>
+            { isOnProcess ? (
+              <ActivityIndicator size={27} color='white' />
+            ) : (
+              <Text style={{color:'white', fontSize:16, fontWeight:'bold', textAlign:'center' }}>Ajukan Sewa</Text>
+            )}
           </Pressable>
         </View>
       </Modal>

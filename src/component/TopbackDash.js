@@ -44,7 +44,7 @@ export default function TopbackDash ({nama, route}) {
           return;
         }
 
-        navigation.navigate('Search', { userId: userId, keyword: searchQuery });
+        navigation.navigate('SearchDash', { userId: userId, keyword: searchQuery });
         setSearchQuery('');
     };
 
@@ -61,9 +61,6 @@ export default function TopbackDash ({nama, route}) {
                 <Text style={{ marginTop: 2, fontSize: 20, fontWeight: '600', color: 'white' }}>{nama}</Text>
                 </View>
                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', marginRight: '5%' }}>
-                    <TouchableOpacity>
-                        <Ionicons name='settings-outline' size={24} color='white' style={{ marginRight: 15 }} />
-                    </TouchableOpacity>
                     <TouchableOpacity>
                         <Ionicons name='notifications-outline' size={24} color='white' style={{ marginRight: 10 }} />
                     </TouchableOpacity>

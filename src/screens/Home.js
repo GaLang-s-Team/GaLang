@@ -3,7 +3,7 @@ import { View, StyleSheet, Image, Dimensions, Text, TouchableOpacity, FlatList }
 import Swiper from 'react-native-swiper';
 import Topback from '../component/Topback';
 import { Ionicons } from '@expo/vector-icons';
-import { doc, getDoc, collection, getDocs, DocumentSnapshot } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, DocumentSnapshot, query, where } from 'firebase/firestore';
 import { destroyKey, getKey } from '../config/localStorage'
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { firebaseAuth, firestore } from '../config/firebase'
@@ -13,14 +13,12 @@ import { useIsFocused } from '@react-navigation/native';
 import Navbar from '../component/Navbar';
 
 const Home = ({ navigation, route }) => {
-    const { userId} = route.params;
+    const { userId } = route.params;
     const [dataUsers, setDataUsers] = useState({});
     const [peralatan, setPeralatan] = useState([]);
-    const [imageUrls, setImageUrls] = useState({});
     const isFocused = useIsFocused();
     const [isLoading, setIsLoading] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
-    const storage = getStorage();
 
     const images = [
         require('../../assets/Sepatu.jpg'),
@@ -32,35 +30,38 @@ const Home = ({ navigation, route }) => {
 
     useEffect(() => {
         setIsLoading(true);
-        const docRef = doc(firestore, 'users', userId);
-        getDoc(docRef).then((doc) => {
-            setDataUsers(doc.data());
-        });
-
-        const fetchPeralatan = async () => {
-            const peralatanCollection = collection(firestore, 'peralatan');
-            const peralatanSnapshot = await getDocs(peralatanCollection);
-            const peralatanList = peralatanSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
-            // Fetch image URLs for each peralatan
-            const urls = {};
-            await Promise.all(peralatanList.map(async (item) => {
-                if (item.foto) {
-                    const urlArray = item.foto.split(',');
-                    if (urlArray.length > 0) {
-                        urls[item.id] = urlArray[0].trim(); // Use the first URL
-                    }
-                }
-            }));
-
-            setPeralatan(peralatanList);
-            setImageUrls(urls);
+        const fetchUserData = async () => {
+            try {
+              const docRef = doc(firestore, 'penyewa', userId);
+              const docSnap = await getDoc(docRef);
+      
+              if (docSnap.exists()) {
+                setDataUsers(docSnap.data());
+              } else {
+                console.log('No such user document!');
+              }
+            } catch (error) {
+              console.error('Error fetching user data:', error);
+            }
         };
 
-        fetchPeralatan().finally(() => {
-            setIsLoading(false);
-        });
-    }, [userId]);
+        const fetchPeralatan = async () => {
+            try {
+                const peralatanCollection = query(collection(firestore, 'peralatan'), where('nama', '!=', ''));
+                const peralatanSnapshot = await getDocs(peralatanCollection);
+                var peralatanList = peralatanSnapshot.docs.map(doc => ({id: doc.id, ...doc.data() }));
+                peralatanList = peralatanList.filter(peralatan => peralatan.lokasi == dataUsers.kota);
+                setPeralatan(peralatanList);
+            } catch (error) {
+                console.error('Error fetching peralatan:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUserData();
+        fetchPeralatan()
+    }, [isFocused, userId, peralatan]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -69,6 +70,7 @@ const Home = ({ navigation, route }) => {
     }, [isFocused, userId]);
 
     function formatHarga(num) {
+        if (num === null) return 0;
         return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
     }
 
@@ -85,23 +87,16 @@ const Home = ({ navigation, route }) => {
             <Text style={styles.harga}>Rp{formatHarga(item.harga)}</Text>
             <Text style={styles.rating}>{formatRating(item.rating)}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name='location-outline' size={20} color='#004268' style={{ marginLeft:9, marginBottom:5 }}/>
-                <Text style={styles.location}>Bandung</Text>
+                <Ionicons name='location-outline' size={20} color='#004268' style={{ marginLeft:7, marginBottom:5 }}/>
+                <Text style={styles.location}>{dataUsers.kota}</Text>
             </View>
         </View>
         </TouchableOpacity>
     );
-
-    const handleLogout = () => {
-        signOut(firebaseAuth).then(() => {
-            destroyKey();
-            navigation.replace('Signin');
-        });
-    };
     
     return (
         <View style={{ flex:1 }}>
-            <Topback nama={dataUsers.fullname} route={route} />
+            <Topback nama={dataUsers.nama} route={route} />
             <View style={styles.swiperContainer}>
                 <Swiper 
                     loop 
@@ -128,17 +123,23 @@ const Home = ({ navigation, route }) => {
                 ))}
             </View>
             <Text style={{ marginHorizontal:'auto', marginLeft:20, marginTop:10, fontWeight:'bold',color:'#004268', fontSize:16 }}>Temukan Perlengkapanmu!</Text>
-            <View style={styles.container}>
-                <FlatList
-                    data={peralatan}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id}
-                    style={styles.flatListContainer}
-                    numColumns={2}
-                    columnWrapperStyle={styles.row}
-                    contentContainerStyle={styles.flatListContainer}
-                />
-            </View>
+            { peralatan.length === 0 ? (
+                <View style={{flex:1, marginHorizontal:'auto', paddingHorizontal:20, justifyContent:'center', alignItems:'center'}}>
+                    <Text style={{color:'#004268', fontSize:14, textAlign:'center'}}>Tidak ada peralatan yang tersedia di kota Anda. Cobalah untuk memilih kota lain pada halaman profile.</Text>
+                </View>
+            ) : (
+                <View style={styles.container}>
+                    <FlatList
+                        data={peralatan}
+                        renderItem={renderItem}
+                        keyExtractor={(item) => item.id}
+                        style={styles.flatListContainer}
+                        numColumns={2}
+                        columnWrapperStyle={styles.row}
+                        contentContainerStyle={styles.flatListContainer}
+                    />
+                </View>
+            )}
             <Navbar route={route}/>
         </View>
     );
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
       },
       rating: {
         color: '#004268',
-        fontSize: 20,
+        fontSize: 14,
         paddingLeft: 10,
       },
       container: {

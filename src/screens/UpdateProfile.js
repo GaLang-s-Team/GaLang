@@ -219,7 +219,7 @@ const UpdateProfile = ({ route, navigation }) => {
     <View style={{ flex: 1, flexDirection: 'column', paddingBottom: 20, marginHorizontal: 'auto', width: '100%', backgroundColor: 'white', maxWidth: 480 }}>
       <Image
         source={require('../../assets/Abstrackprof.png')}
-        style={{ position: 'absolute', width: 395, height: 199 }}
+        style={{ position: 'absolute', width: '100%', height: 199 }}
       />
       <View style={{ marginTop: '10%', marginLeft: '4%' }}>
         <TouchableOpacity onPress={navigateToProfile} style={{ position: 'absolute', top: 20, left: 5, borderRadius: 50, backgroundColor: '#FFFFFF', padding: 10 }}>
@@ -333,7 +333,7 @@ const UpdateProfile = ({ route, navigation }) => {
           borderRadius: 50,
         }} onPress={handleUpdateData}>
           {isLoading ? (
-            <ActivityIndicator color="white" size="large" />
+            <ActivityIndicator color="white" size="medium" />
           ) : (<Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>Update profile</Text>)}
         </TouchableOpacity>
       </View>

@@ -1,6 +1,6 @@
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
 import React, { useLayoutEffect, useState, useEffect } from 'react'
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc, setDoc, collection } from 'firebase/firestore'
 import { firestore, storage } from '../config/firebase'
 import { Toast } from 'react-native-toast-notifications'
 import getBlobFromUri from '../utils/getBlobFromUri'
@@ -198,6 +198,14 @@ const UpdateProfileDash = ({ route, navigation }) => {
             };
 
             await updateDoc(colRef, dataUpdateWithImage);
+            
+            const peralatanRef = query(collection(firestore, "peralatan"), where("penyedia", "==", id_pengguna));
+            const peralatanSnapshot = await getDocs(peralatanRef);
+            peralatanSnapshot.forEach(async (doc) => {
+              let perRef = doc(firestore, "peralatan", doc.id);
+              await updateDoc(perRef, { lokasi: inputs.kota.value ? inputs.kota.value : route.params.kota });
+            });
+
             setSnackbarMessage("Profile updated");
             setSnackbarVisible(true);
             navigation.replace("ProfilDash", { userId: userId });
@@ -219,7 +227,7 @@ const UpdateProfileDash = ({ route, navigation }) => {
     <View style={{ flex: 1, flexDirection: 'column', paddingBottom: 20, marginHorizontal: 'auto', width: '100%', backgroundColor: 'white', maxWidth: 480 }}>
       <Image
         source={require('../../assets/Abstrackprof.png')}
-        style={{ position: 'absolute', width: 395, height: 199 }}
+        style={{ position: 'absolute', width: '100%', height: 199 }}
       />
       <View style={{ marginTop: '10%', marginLeft: '4%' }}>
         <TouchableOpacity onPress={navigateToProfile} style={{ position: 'absolute', top: 20, left: 5, borderRadius: 50, backgroundColor: '#FFFFFF', padding: 10 }}>
@@ -333,7 +341,7 @@ const UpdateProfileDash = ({ route, navigation }) => {
           borderRadius: 50,
         }} onPress={handleUpdateData}>
           {isLoading ? (
-            <ActivityIndicator color="white" size="large" />
+            <ActivityIndicator color="white" size="medium" />
           ) : (<Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>Update profile</Text>)}
         </TouchableOpacity>
       </View>

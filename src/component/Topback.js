@@ -62,9 +62,6 @@ export default function Topback ({nama, route}) {
                 </View>
                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', marginRight: '5%' }}>
                     <TouchableOpacity>
-                        <Ionicons name='settings-outline' size={24} color='white' style={{ marginRight: 15 }} />
-                    </TouchableOpacity>
-                    <TouchableOpacity>
                         <Ionicons name='notifications-outline' size={24} color='white' style={{ marginRight: 10 }} />
                     </TouchableOpacity>
                 </View>

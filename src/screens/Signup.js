@@ -113,7 +113,9 @@ const Signup = () => {
                     status_tagihan: "berjalan",
                     tagihan: 0,
                     bukti_tagihan: "",
-                    diskon_tagihan: false
+                    diskon_tagihan: false,
+                    transaksi: 0,
+                    booster: 0,
                 };
 
                 await setDoc(doc(firestore, "penyedia", id_pengguna), docRefRole)

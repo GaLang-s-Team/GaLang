@@ -47,7 +47,7 @@ const Navbar = ({ route }) => {
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={handleToGarasi}>
                 <Ionicons name="basket-outline" size={24} color="gray" />
-                <Text style={styles.menuText}>Grasi</Text>
+                <Text style={styles.menuText}>Garasi</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={handleToProfile}>
                 <Ionicons name="person-outline" size={24} color="gray" />

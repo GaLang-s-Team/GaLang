@@ -33,13 +33,13 @@ const Profil = ({ navigation, route }) => {
         }).finally(() => {
             setIsLoading(false);
         });
-    }, [isFocused, userId]);
+    }, [isFocused, userId, dataUsers]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
             headerLeft: null,
         });
-    }, [isFocused, userId]);
+    }, [isFocused, userId, dataUsers]);
     
 
     return (
@@ -55,10 +55,10 @@ const Profil = ({ navigation, route }) => {
             </Text>
 
             <View style={{ marginTop: "27%", alignItems: 'center', zIndex: 1 }}>
-                {/* <Image
+                <Image
                     source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.nama}` }}
                     style={{ width: 100, height: 100, borderRadius: 50 }}
-                /> */}
+                />
                 <View style={{ alignItems: 'center', marginTop: 9 }}>
                     {dataUsers ? (
                         <>
@@ -150,7 +150,7 @@ const Profil = ({ navigation, route }) => {
                             <Text style={{ paddingLeft: 20, fontSize: 15, fontWeight: 'bold', color: '#004268', }}>{dataUsers.kota}</Text>
                     </View>
                 </View>
-                <TouchableOpacity style={styles.tags} onPress={handleLogout}>
+                <TouchableOpacity style={[styles.tags, {marginBottom:10}]} onPress={handleLogout}>
                             <Image source={require('../../assets/Logout.png')}
                                 // source={{ uri: dataUsers.imageUri ? dataUsers.imageUri : `https://ui-avatars.com/api/?name=${dataUsers.fullname}` }}
                                 style={{ width: 39, height: 39, borderRadius: 50 }}

@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useLayoutEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Alert, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Modal, Pressable } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
-import * as ImageManipulator from 'expo-image-manipulator';
 import { collection, doc, addDoc, query, where, getDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { useIsFocused } from '@react-navigation/native';
 
@@ -24,68 +21,69 @@ export default function TransaksiReview({ navigation, route }) {
 
   const isFocused = useIsFocused();
 
+  const fetchPermintaan = async () => {
+    const permintaanRef = query(collection(firestore, 'informasi_penyewaan'), where('penyedia', '==', userId), where('status', '==', 'Menunggu Konfirmasi'));
+    const permintaanDoc = await getDocs(permintaanRef);
+    if (permintaanDoc) {
+      const permintaan = permintaanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      permintaan.sort((a, b) => b.id_transaksi - a.id_transaksi);
+      let daftarPeralatan =[];
+
+      for (let i = 0; i < permintaan.length; i++) {
+        const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', permintaan[i].peralatan));
+        const peralatanDoc = await getDocs(peralatanRef);
+        if (peralatanDoc) {
+          const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          daftarPeralatan.push(peralatan[0]);
+        }
+      }
+      
+      setPeralatanPermintaan(daftarPeralatan);
+      setTransaksiPermintaan(permintaan);
+    } else {
+      console.log('No such permintaan!');
+    }
+  };
+
+  const fetchAktif = async () => {
+    const aktifRef = query(collection(firestore, 'informasi_penyewaan'), where('penyedia', '==', userId), where('status', '==', 'Aktif'));
+    const waitRef = query(collection(firestore, 'informasi_penyewaan'), where('penyedia', '==', userId), where('status', '==', 'Menunggu Pembayaran'));
+    const [aktifDoc, waitDoc] = await Promise.all([getDocs(aktifRef), getDocs(waitRef)]);
+
+    if (aktifDoc || waitDoc) {
+      let daftarPeralatan =[];
+
+      const aktif = aktifDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      for (let i = 0; i < aktif.length; i++) {
+        const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', aktif[i].peralatan));
+        const peralatanDoc = await getDocs(peralatanRef);
+        if (peralatanDoc) {
+          const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          daftarPeralatan.push(peralatan[0]);
+        }
+      }
+
+      const wait = waitDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      for (let i = 0; i < wait.length; i++) {
+        const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', wait[i].peralatan));
+        const peralatanDoc = await getDocs(peralatanRef);
+        if (peralatanDoc) {
+          const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          daftarPeralatan.push(peralatan[0]);
+        }
+      }
+      
+      let transaksi = [...aktif, ...wait];
+      transaksi.sort((a, b) => a.id_transaksi - b.id_transaksi);
+      setPeralatanAktif(daftarPeralatan);
+      setTransaksiAktif(transaksi);
+    } else {
+      console.log('No such permintaan!');
+    }
+  };
+  
   useEffect(() => {
     setLoading(true)
-
-    const fetchPermintaan = async () => {
-      const permintaanRef = query(collection(firestore, 'informasi_penyewaan'), where('penyedia', '==', userId), where('status', '==', 'Menunggu Konfirmasi'));
-      const permintaanDoc = await getDocs(permintaanRef);
-      if (permintaanDoc) {
-        const permintaan = permintaanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        let daftarPeralatan =[];
-
-        for (let i = 0; i < permintaan.length; i++) {
-          const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', permintaan[i].peralatan));
-          const peralatanDoc = await getDocs(peralatanRef);
-          if (peralatanDoc) {
-            const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            daftarPeralatan.push(peralatan[0]);
-          }
-        }
-        
-        setPeralatanPermintaan(daftarPeralatan);
-        setTransaksiPermintaan(permintaan);
-      } else {
-        console.log('No such permintaan!');
-      }
-    };
-  
-    const fetchAktif = async () => {
-      const aktifRef = query(collection(firestore, 'informasi_penyewaan'), where('penyedia', '==', userId), where('status', '==', 'Aktif'));
-      const waitRef = query(collection(firestore, 'informasi_penyewaan'), where('penyedia', '==', userId), where('status', '==', 'Menunggu Pembayaran'));
-      const [aktifDoc, waitDoc] = await Promise.all([getDocs(aktifRef), getDocs(waitRef)]);
-
-      if (aktifDoc || waitDoc) {
-        let daftarPeralatan =[];
-
-        const aktif = aktifDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        for (let i = 0; i < aktif.length; i++) {
-          const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', aktif[i].peralatan));
-          const peralatanDoc = await getDocs(peralatanRef);
-          if (peralatanDoc) {
-            const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            daftarPeralatan.push(peralatan[0]);
-          }
-        }
-
-        const wait = waitDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        for (let i = 0; i < wait.length; i++) {
-          const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', wait[i].peralatan));
-          const peralatanDoc = await getDocs(peralatanRef);
-          if (peralatanDoc) {
-            const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            daftarPeralatan.push(peralatan[0]);
-          }
-        }
-        
-        let transaksi = [...aktif, ...wait];
-        setPeralatanAktif(daftarPeralatan);
-        setTransaksiAktif(transaksi);
-      } else {
-        console.log('No such permintaan!');
-      }
-    };
-
     fetchPermintaan();
     fetchAktif();
     setLoading(false)
@@ -112,20 +110,20 @@ export default function TransaksiReview({ navigation, route }) {
       try {
         const q = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', docSnapshot.docs[0].data().peralatan));
         const querySnapshot = await getDocs(q);
-        
         const docSnapId = querySnapshot.docs[0].id;
         await updateDoc(doc(firestore, 'peralatan', docSnapId), {
           jumlah_sewa: querySnapshot.docs[0].data().jumlah_sewa + 1,
           ketersediaan: querySnapshot.docs[0].data().ketersediaan - docSnapshot.docs[0].data().jumlah,
         });
       } catch (error) {
-        Alert.alert('Error', 'Failed: ' + error.message);
+        Alert.alert('Gagal', 'Terdapat kesalahan pada sistem, silahkan coba lagi');
       }
 
       console.log('Status updated successfully');
     } catch (error) {
       console.error('Error updating status: ', error);
     } finally {
+      fetchPermintaan();
       setLoading(false)
     }
   }
@@ -133,7 +131,8 @@ export default function TransaksiReview({ navigation, route }) {
   const handleTolak = async (transaksiId) => {
     setLoading(true)
     const docRef = query(collection(firestore, 'informasi_penyewaan'), where('id_transaksi', '==', transaksiId));
-    const docId = (await getDocs(docRef)).docs[0].id;
+    const docSnapshot = await getDocs(docRef);
+    const docId = docSnapshot.docs[0].id;
 
     try {
       const informasiPenyewaanRef = doc(firestore, 'informasi_penyewaan', docId);
@@ -141,15 +140,29 @@ export default function TransaksiReview({ navigation, route }) {
         status: 'Ditolak',
       });
 
+      const qty = docSnapshot.docs[0].data().jumlah;
+      const peralatanRef = collection(firestore, "peralatan");
+      const queryPeralatan = query(peralatanRef, where('id_peralatan', '==', docSnapshot.docs[0].data().peralatan));
+      const snapshotPeralatan = await getDocs(queryPeralatan);
+      
+      const peralatanDoc = snapshotPeralatan.docs[0];
+      const peralatanRefUpdate = doc(firestore, "peralatan", peralatanDoc.id);
+
+      await updateDoc(peralatanRefUpdate, {
+          ketersediaan: peralatanDoc.data().ketersediaan + qty
+      });
+
       console.log('Status updated successfully');
     } catch (error) {
       console.error('Error updating status: ', error);
     } finally {
+      fetchPermintaan();
       setLoading(false)
     }
   }
 
   function formatHarga(num) {
+    if (num === null) return 0;
     return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
   }
 
@@ -196,7 +209,7 @@ export default function TransaksiReview({ navigation, route }) {
         </View>
         <TouchableOpacity style={{width:90, height:35, marginLeft:2.5, marginTop:65, justifyContent:'center', alignItems:'center', backgroundColor:'#459708', borderRadius:10}}
           onPress={() => navigation.navigate('PembayaranReview', { userId: userId, transaksiId: transaksi.id_transaksi})}>
-          <Text style={{color:'#FFFFFF', fontSize:16, fontWeight:'bold'}}>Periksa</Text>
+          <Text style={{color:'#FFFFFF', fontSize:14, fontWeight:'bold'}}>Periksa</Text>
         </TouchableOpacity>
       </View>
     );

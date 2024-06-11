@@ -31,12 +31,13 @@ export default function HistoryPenyewaan({ navigation, route }) {
 
         if (!snapshotTransaksi.empty) {
           const transaksiInfo = snapshotTransaksi.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          transaksiInfo.sort((a, b) => b.id_transaksi - a.id_transaksi);
           let daftarPeralatan =[];
 
           for (let i = 0; i < transaksiInfo.length; i++) {
             const peralatanRef = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', transaksiInfo[i].peralatan));
             const peralatanDoc = await getDocs(peralatanRef);
-            if (peralatanDoc) {
+            if (peralatanDoc.docs.length > 0) {
               const peralatan = peralatanDoc.docs.map(doc => ({ id: doc.id, ...doc.data() }));
               daftarPeralatan.push(peralatan[0]);
             }

@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { collection, doc, query, where, getDocs, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, query, where, getDocs, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import TopbarBack from '../component/TopbarBack';
@@ -102,13 +102,26 @@ export default function PeralatanEdit({ navigation, route }) {
         const q = query(collection(firestore, 'peralatan'), where('id_peralatan', '==', peralatanId));
         const querySnapshot = await getDocs(q);
         
+        const penyewaanRef = query(collection(firestore, 'informasi_penyewaan'), where('peralatan', '==', peralatanId));
+        const penyewaanSnapshot = await getDocs(penyewaanRef);
+
+        if (penyewaanSnapshot.size > 0) {
+          Alert.alert('Gagal', 'Peralatan tidak dapat dihapus karena sedang ditransaksikan!');
+          return;
+        }
+
         const docId = querySnapshot.docs[0].id;
-        await deleteDoc(doc(firestore, 'peralatan', docId));
+        await setDoc(doc(firestore, 'peralatan', docId), {
+          deleted: true,
+          id_peralatan: peralatanId,
+          nama: querySnapshot.docs[0].data().nama,
+          foto: 'https://via.placeholder.com/250'
+        });
 
         Alert.alert('Berhasil', 'Peralatan berhasil dihapus!');
         navigation.navigate('Dashboard', { userId: userId });
       } catch (error) {
-        Alert.alert('Error', 'Gagal untuk menghapus peralatan: ' + error.message);
+        Alert.alert('Gagal', 'Gagal untuk menghapus peralatan: ' + error.message);
       } finally {
         setLoading(false); // Akhiri loading
       }
@@ -117,11 +130,11 @@ export default function PeralatanEdit({ navigation, route }) {
   
   const handleUpdatePeralatan = async () => {
     if (images.includes(null)) {
-      Alert.alert('Error', 'Please upload 3 images.');
+      Alert.alert('Error', 'Silahkan unggah 3 foto peralatan');
       return;
     }
     if (!peralatanName || !peralatanPrice || !peralatanDescription || !peralatanQuantity || !peralatanSizes || !selectedCategory) {
-      Alert.alert('Error', 'Please fill in all fields.');
+      Alert.alert('Error', 'Silahkan isi semua kolom yang tersedia');
       return;
     }
     
@@ -170,7 +183,7 @@ export default function PeralatanEdit({ navigation, route }) {
       Alert.alert('Berhasil', 'Peralatan berhasil diperbarui!');
       navigation.navigate('Dashboard', { userId: userId });
     } catch (error) {
-      Alert.alert('Error', 'Gagal untuk memperbarui peralatan: ' + error.message);
+      Alert.alert('Gagal', 'Gagal untuk memperbarui peralatan: ' + error.message);
     } finally {
       setLoading(false); // Akhiri loading
     }
