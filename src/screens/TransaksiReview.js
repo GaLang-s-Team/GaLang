@@ -180,14 +180,16 @@ export default function TransaksiReview({ navigation, route }) {
             <Text style={[styles.itemDescription]}>Pengambilan : {transaksi.pengambilan}</Text>
             <Text style={[styles.itemDescription]}>Pengembalian : {transaksi.pengembalian}</Text>
         </View>
-        <TouchableOpacity style={{width:35, height:35, marginRight:2.5, marginTop:65, justifyContent:'center', alignItems:'center', backgroundColor:'#FB0A0A', borderRadius:10}}
-          onPress={() => Alert.alert('Konfirmasi', 'Apakah anda yakin ingin menolak transaksi ini?', [{text: 'Tidak', onPress: () => {}}, {text: 'Ya', onPress: () => {handleTolak(transaksi.id_transaksi)}}])}>
-          <Ionicons name='close' size={25} color='#FFFFFF'/>
-        </TouchableOpacity>
-        <TouchableOpacity style={{width:35, height:35, marginLeft:2.5, marginTop:65, justifyContent:'center', alignItems:'center', backgroundColor:'#459708', borderRadius:10}}
-          onPress={() => handleTerima(transaksi.id_transaksi)}>
-          <Ionicons name='checkmark' size={25} color='#FFFFFF'/>
-        </TouchableOpacity>
+        <View style={{flexDirection:'row', justifyContent:'flex-end', alignItems:'flex-end'}}>
+          <TouchableOpacity style={{width:25, height:25, marginRight:2.5, marginTop:65, justifyContent:'center', alignItems:'center', backgroundColor:'#FB0A0A', borderRadius:10}}
+            onPress={() => Alert.alert('Konfirmasi', 'Apakah anda yakin ingin menolak transaksi ini?', [{text: 'Tidak', onPress: () => {}}, {text: 'Ya', onPress: () => {handleTolak(transaksi.id_transaksi)}}])}>
+            <Ionicons name='close' size={15} color='#FFFFFF'/>
+          </TouchableOpacity>
+          <TouchableOpacity style={{width:25, height:25, marginLeft:2.5, marginRight:5, marginTop:65, justifyContent:'center', alignItems:'center', backgroundColor:'#459708', borderRadius:10}}
+            onPress={() => handleTerima(transaksi.id_transaksi)}>
+            <Ionicons name='checkmark' size={15} color='#FFFFFF'/>
+          </TouchableOpacity>
+        </View>
       </View>
     );
     
@@ -207,10 +209,12 @@ export default function TransaksiReview({ navigation, route }) {
             <Text style={[styles.itemDescription]}>Pengambilan : {transaksi.pengambilan}</Text>
             <Text style={[styles.itemDescription]}>Pengembalian : {transaksi.pengembalian}</Text>
         </View>
-        <TouchableOpacity style={{width:90, height:35, marginLeft:2.5, marginTop:65, justifyContent:'center', alignItems:'center', backgroundColor:'#459708', borderRadius:10}}
-          onPress={() => navigation.navigate('PembayaranReview', { userId: userId, transaksiId: transaksi.id_transaksi})}>
-          <Text style={{color:'#FFFFFF', fontSize:14, fontWeight:'bold'}}>Periksa</Text>
-        </TouchableOpacity>
+        <View style={{flexDirection:'row', justifyContent:'flex-end', alignItems:'flex-end'}}>
+          <TouchableOpacity style={{width:70, height:35, marginLeft:2.5, marginRight:5, marginTop:65, justifyContent:'center', alignItems:'center', backgroundColor:'#459708', borderRadius:10}}
+            onPress={() => navigation.navigate('PembayaranReview', { userId: userId, transaksiId: transaksi.id_transaksi})}>
+            <Text style={{color:'#FFFFFF', fontSize:14, fontWeight:'semibold'}}>Periksa</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   };

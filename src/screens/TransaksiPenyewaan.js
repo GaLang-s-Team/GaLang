@@ -14,7 +14,7 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
   const [data, setData] = useState([]);
   const [rating, setRating] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [isModalVisible, setIsModalVisible] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const { userId } = route.params;
 
   const fetchData = async () => {
@@ -23,15 +23,16 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
       const informasiPenyewaanRef = collection(firestore, 'informasi_penyewaan');
       const queryInformasiPenyewaan = query(informasiPenyewaanRef, where("penyewa", "==", userId));
       const snapshotInformasiPenyewaan = await getDocs(queryInformasiPenyewaan);
+
+      let informasiPenyewaanData =[]
       const informasiPenyewaanDataPromises = snapshotInformasiPenyewaan.docs.map(async (doc) => {
         const data = doc.data();
         const peralatanRef = collection(firestore, 'peralatan');
         const queryPeralatan = query(peralatanRef, where('id_peralatan', '==', data.peralatan));
         const snapshotPeralatan = await getDocs(queryPeralatan);
 
-        if (snapshotPeralatan.docs.length != 0 && data.status != undefined) {
-          console.log(snapshotPeralatan.docs[0].data());
-          return {
+        if (snapshotPeralatan.docs.length != 0) {
+          informasiPenyewaanData.push({
             transaksiId: data.id_transaksi,
             penyedia: data.penyedia,
             peralatanId: data.peralatan,
@@ -44,11 +45,11 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
             pengembalian: data.pengembalian,
             status: data.status,
             foto: snapshotPeralatan.docs[0].data().foto.split(',')[0]
-          };
+          });
         }
       });
 
-      const informasiPenyewaanData = await Promise.all(informasiPenyewaanDataPromises);
+      await Promise.all(informasiPenyewaanDataPromises);
       setData(informasiPenyewaanData);
       setLoading(false);
     } catch (error) {
@@ -62,12 +63,12 @@ const TransaksiPenyewaan = ({ navigation, route }) => {
   }, [selectedMenu])
 
   let filteredData = [];
-  if (data.length != 0 && data.status != undefined) {
+  console.log(data);
+  if (data.length != 0) {
     if (selectedMenu === "Menunggu") {
       filteredData = data.filter(item => item.status === "Menunggu Konfirmasi" || item.status === "Menunggu Pembayaran");
     }
     else if (selectedMenu === "Selesai") {
-      console.log(data);
       filteredData = data.filter(item => item.status === "Ditolak" || item.status === "Selesai" || item.status === "Aktif");
     }
   }

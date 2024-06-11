@@ -25,10 +25,10 @@ const PembayaranTagihan = ({ navigation, route }) => {
                 const snapshotPenyedia = await getDocs(queryPenyedia);
 
                 const tagihan = snapshotPenyedia.docs[0].data().tagihan;
-                const diskon = snapshotPenyedia.docs[0].data().diskon_tagihan;
+                const dataDiskon = snapshotPenyedia.docs[0].data().diskon_tagihan;
                 const uploadedImage = snapshotPenyedia.docs[0].data().bukti_tagihan;
 
-                setDiskon(diskon);
+                setDiskon(dataDiskon);
                 setUploadedImage(uploadedImage);
                 
                 if (diskon) {
@@ -127,7 +127,7 @@ const PembayaranTagihan = ({ navigation, route }) => {
                 <Text style={{color:'#004268', marginBottom: 5}}>Harap lakukan pembayaran sesuai nominal tagihan Anda.</Text>
                 <Text style={{color:'#004268', marginBottom: 5}}>Tagihan : Rp{formatDigit(tagihan)}</Text>
                 <Text style={{color:'#004268', marginBottom: 5}}>Rekening Pembayaran : 123456789</Text>
-                {uploadedImage && (
+                {uploadedImage && !isLoading && (
                     <Image source={{ uri: uploadedImage }} style={{ width: '100%', marginTop:30, height: 300, borderRadius: 10 }} />
                 )} 
             </View>

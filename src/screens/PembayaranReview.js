@@ -90,6 +90,8 @@ export default function PembayaranReview ({ navigation, route }) {
                         booster: penyediaDoc.docs[0].data().booster - 1
                     });
                 }
+            } else {
+                Alert.alert('Error', 'Bukti pembayaran belum diupload');
             }
         } catch (error) {
             console.error('Failed:', error);

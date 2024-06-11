@@ -36,12 +36,6 @@ export default function PeralatanDetail({ navigation, route }) {
   const [isOnProcess, setIsOnProcess] = useState(false);
   const [isBuyModalVisible, setBuyModalVisible] = useState(false);
   const [garasiVisible, setGarasiVisible] = useState(false);
-  
-  const similarPeralatans = [
-    // Data peralatan serupa
-    { id: '1', name: 'Peralatan 1', image: 'https://via.placeholder.com/100', price: '10000' },
-    { id: '2', name: 'Peralatan 2', image: 'https://via.placeholder.com/100', price: '15000' },
-  ];
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -218,9 +212,6 @@ export default function PeralatanDetail({ navigation, route }) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name='arrow-back' size={24} color='#FFFFFF' />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.shareButton} onPress={() => Alert.alert('Share', 'Share this peralatan!')}>
-            <Ionicons name='share-social' size={24} color='#FFFFFF' />
-          </TouchableOpacity>
         </View>
         <View style={styles.imageSlider}>
           <TouchableOpacity style={styles.arrowLeft}>
@@ -247,30 +238,12 @@ export default function PeralatanDetail({ navigation, route }) {
           </TouchableOpacity>
           <View style={styles.storeInfo}>
             <Text style={styles.storeName}>{penyediaNama}</Text>
-            <TouchableOpacity onPress={() => Alert.alert('Store', 'Go to store page!')}>
-              <Text style={styles.visitStore}>Lihat Toko</Text>
-            </TouchableOpacity>
           </View>
         </View>
         <View style={styles.peralatanDescription}>
           <Text style={styles.sectionTitle}>Deskripsi Peralatan</Text>
           <Text style={[styles.sectionDescription, {marginBottom:5}]}>Tersedia: {peralatanKetersediaan}</Text>
           <Text style={styles.sectionDescription}>{peralatanDeskripsi}</Text>
-        </View>
-        <View style={styles.similarPeralatans}>
-          <Text style={styles.sectionTitle}>Peralatan Serupa</Text>
-          <FlatList
-            data={similarPeralatans}
-            renderItem={({ item }) => (
-              <View style={styles.similarPeralatanCard}>
-                <Image source={{ uri: item.image }} style={styles.similarPeralatanImage} />
-                <Text style={styles.sectionDescription}>{item.name}</Text>
-                <Text style={styles.sectionDescription}>Rp{item.price}</Text>
-              </View>
-            )}
-            keyExtractor={(item) => item.id}
-            horizontal
-          />
         </View>
       </ScrollView>
       <View style={styles.footerButtons}>
@@ -498,19 +471,6 @@ const styles = StyleSheet.create({
   },
   sectionDescription: {
     color: '#004268',
-  },
-  similarPeralatans: {
-    padding: 10,
-  },
-  similarPeralatanCard: {
-    width: 100,
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  similarPeralatanImage: {
-    width: 100,
-    height: 100,
-    marginBottom: 5,
   },
   footerButtons: {
     position: 'absolute',

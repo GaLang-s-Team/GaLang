@@ -1,6 +1,6 @@
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
 import React, { useLayoutEffect, useState, useEffect } from 'react'
-import { doc, getDoc, updateDoc, setDoc, collection } from 'firebase/firestore'
+import { doc, getDoc, updateDoc, getDocs, setDoc, collection } from 'firebase/firestore'
 import { firestore, storage } from '../config/firebase'
 import { Toast } from 'react-native-toast-notifications'
 import getBlobFromUri from '../utils/getBlobFromUri'
@@ -130,6 +130,14 @@ const UpdateProfileDash = ({ route, navigation }) => {
       setIsLoading(true)
       try {
         await updateDoc(colRef, dataUpdate);
+
+        const peralatanRef = query(collection(firestore, "peralatan"), where("penyedia", "==", id_pengguna));
+        const peralatanSnapshot = await getDocs(peralatanRef);
+        peralatanSnapshot.forEach(async (doc) => {
+          let perRef = doc(firestore, "peralatan", doc.id);
+          await updateDoc(perRef, { lokasi: inputs.kota.value ? inputs.kota.value : route.params.kota });
+        });
+
         setSnackbarMessage("Profile Updated");
         setSnackbarVisible(true);
         navigation.replace("ProfilDash", { userId: userId });

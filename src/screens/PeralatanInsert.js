@@ -131,7 +131,8 @@ export default function PeralatanInsert({ navigation, route }) {
       foto: imageUrls,
       penyedia: userId,
       lokasi: dataUsers.kota,
-      search: searchGrams(peralatanName)
+      search: searchGrams(peralatanName),
+      count_rating: 0,
     };
 
     try {
